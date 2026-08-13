@@ -12,3 +12,5 @@ func main() {
 	result := parser.Run(expr)
 	fmt.Println(result)
 }
+
+// processa os elementos, retorna o resultado e printa
