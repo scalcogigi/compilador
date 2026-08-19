@@ -25,15 +25,29 @@ func Run(code string) int {
 	return result
 } 
 
+func isDigit(c byte) bool {
+	return c >= '0' && c <= '9'
+}
 
 // pré-processamento 
 func removeSpaces(code string) (string) {
 	result := ""
-    for _, c := range code {
-        if c != ' ' { // remove espaços
-            result += string(c)
-        }
+    for i := 0; i < len(code); i++ {
+        c := code[i]
+        if c == ' ' { // remove espaços
+			if i > 0 &&
+				i < len(code)-1 &&
+				isDigit(code[i-1]) &&
+				isDigit(code[i+1]) {
+
+        panic("esperava um operador")
     }
+
+    continue
+}
+
+	result += string(c)
+	}
     return result
 }
 
