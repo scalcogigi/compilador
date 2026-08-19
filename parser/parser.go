@@ -1,14 +1,30 @@
 package parser
-import "fmt"
+import ("strconv")
 
 func Run(code string) int {
 	
 	code = removeSpaces(code)
-	number, _ := readNumber(code, 0)
+	result, pos := readNumber(code, 0)
 
-    fmt.Println(number)
-	return len(code)
-}
+	for pos < len(code) {
+		operator := code[pos]
+		pos++
+		if pos >= len(code) {
+    		panic("esperava um número")
+		}		
+		nextNumber, newPos := readNumber(code, pos)
+		if operator == '+' {
+			result += nextNumber
+		} else if operator == '-' {
+			result -= nextNumber
+		} else {
+			panic("Operador inválido: " + string(operator))
+		}
+		pos = newPos
+	}
+	return result
+} 
+
 
 // pré-processamento 
 func removeSpaces(code string) (string) {
@@ -22,7 +38,7 @@ func removeSpaces(code string) (string) {
 }
 
 // considera apenas números
-func readNumber(code string, start int) (string, int) {
+func readNumber(code string, start int) (int, int) {
 	number := ""
 	i := start
 	for ; i < len(code); i++ {
@@ -32,5 +48,10 @@ func readNumber(code string, start int) (string, int) {
 			break
 		}
 	}
-	return number, i
+
+	numberInt, err := strconv.Atoi(number)
+	if err != nil {
+		panic(err)
+	}
+	return numberInt, i
 }
