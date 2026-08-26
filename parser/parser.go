@@ -1,75 +1,57 @@
 package parser
-import ("strconv")
 
+import (
+	"compilador/lexer"
+	"compilador/token"
+)
+
+type Parser struct {
+	Lex *lexer.Lexer
+}
+
+// deve ser estático
 func Run(code string) int {
-	
-	code = removeSpaces(code)
-	result, pos := readNumber(code, 0)
+	lex := lexer.New(code)
 
-	for pos < len(code) {
-		operator := code[pos]
-		pos++
-		if pos >= len(code) {
-    		panic("esperava um número")
-		}		
-		nextNumber, newPos := readNumber(code, pos)
-		if operator == '+' {
-			result += nextNumber
-		} else if operator == '-' {
-			result -= nextNumber
-		} else {
-			panic("Operador inválido: " + string(operator))
-		}
-		pos = newPos
+	parser := &Parser{
+		Lex: lex,
+	}
+
+	parser.Lex.SelectNext()
+	result := parser.parseExpression()
+	
+	if parser.Lex.Next.Type != token.EOF {
+		panic("[Parser] Esperado EOF, mas encontrado: " + parser.Lex.Next.Type)
+	}
+	
+	return result
+}
+
+func (p *Parser) parseExpression() int {
+	
+	if p.Lex.Next.Type != token.INT {
+		panic("[Parser] Esperado um número inteiro, mas encontrado: " + p.Lex.Next.Type)
+	}
+
+	result := p.Lex.Next.Value.(int)
+	p.Lex.SelectNext()
+
+	for p.Lex.Next.Type == token.PLUS || p.Lex.Next.Type == token.MINUS {
+		operator := p.Lex.Next.Type
+			p.Lex.SelectNext()
+			if p.Lex.Next.Type != token.INT {
+				panic("[Parser] Esperado um número inteiro, mas encontrado: " + p.Lex.Next.Type)
+			}
+			value := p.Lex.Next.Value.(int)
+
+			switch operator {
+				case token.PLUS:
+					result += value
+				case token.MINUS:
+					result -= value
+			}
+		
+			p.Lex.SelectNext()
 	}
 	return result
-} 
-
-func isDigit(c byte) bool {
-	return c >= '0' && c <= '9'
 }
-
-// pré-processamento 
-func removeSpaces(code string) (string) {
-	result := ""
-    for i := 0; i < len(code); i++ {
-        c := code[i]
-        if c == ' ' { // remove espaços
-			if i > 0 &&
-				i < len(code)-1 &&
-				isDigit(code[i-1]) &&
-				isDigit(code[i+1]) {
-
-        panic("esperava um operador")
-    }
-
-    continue
-}
-
-	result += string(c)
-	}
-    return result
-}
-
-// considera apenas números
-func readNumber(code string, start int) (int, int) {
-	number := ""
-	i := start
-	for ; i < len(code); i++ {
-		if code[i] >= '0' && code[i] <= '9'{ // como é um byte, faz sentido verificar todos os dígitos
-			number += string(code[i])
-		} else {
-			break
-		}
-	}
-
-	numberInt, err := strconv.Atoi(number)
-	if err != nil {
-		panic(err)
-	}
-	return numberInt, i
-}
-
-lex := lexer.New(code)
-
-parseExpression()

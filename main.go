@@ -7,6 +7,9 @@ import (
 )
 
 func main() {
+	if len(os.Args) != 2 {
+	panic("uso: go run . \"1+2\"")
+	}
 	expr := os.Args[1]
 	result := parser.Run(expr)
 	fmt.Println(result)
