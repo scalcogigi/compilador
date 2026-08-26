@@ -69,3 +69,7 @@ func readNumber(code string, start int) (int, int) {
 	}
 	return numberInt, i
 }
+
+lex := lexer.New(code)
+
+parseExpression()
