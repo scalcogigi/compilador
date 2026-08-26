@@ -5,6 +5,7 @@ const (
 	PLUS  = "PLUS" // +
 	MINUS = "MINUS" // -
 	EOF   = "EOF" // end of file
+	XOR = "XOR" // ^
 )
 
 type Token struct {

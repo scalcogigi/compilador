@@ -36,7 +36,7 @@ func (p *Parser) parseExpression() int {
 	result := p.Lex.Next.Value.(int)
 	p.Lex.SelectNext()
 
-	for p.Lex.Next.Type == token.PLUS || p.Lex.Next.Type == token.MINUS {
+	for p.Lex.Next.Type == token.PLUS || p.Lex.Next.Type == token.MINUS || p.Lex.Next.Type == token.XOR {
 		operator := p.Lex.Next.Type
 			p.Lex.SelectNext()
 			if p.Lex.Next.Type != token.INT {
@@ -49,6 +49,8 @@ func (p *Parser) parseExpression() int {
 					result += value
 				case token.MINUS:
 					result -= value
+				case token.XOR:
+					result ^= value
 			}
 		
 			p.Lex.SelectNext()

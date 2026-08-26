@@ -44,6 +44,15 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 		return
 	}
 
+	if l.Source[l.Position] == '^' {
+		l.Next = token.Token{
+			Type:  token.XOR,
+			Value: "^",
+		}
+		l.Position++
+		return
+	}
+
 	if l.Source[l.Position] >= '0' && l.Source[l.Position] <= '9' {
 		number := "" // inicializa vazia para armanzenar o número
 
