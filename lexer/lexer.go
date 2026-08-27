@@ -18,6 +18,7 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 		l.Position++
 	}
 
+	// se vazio
 	if l.Position >= len(l.Source) {
 		l.Next = token.Token{
 			Type:  token.EOF,
@@ -26,6 +27,7 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 		return
 	}
 
+	// se soma
 	if l.Source[l.Position] == '+' {
 		l.Next = token.Token{
 			Type:  token.PLUS,
@@ -35,6 +37,7 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 		return
 	}
 
+	// se subtrai
 	if l.Source[l.Position] == '-' {
 		l.Next = token.Token{
 			Type:  token.MINUS,
@@ -44,6 +47,47 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 		return
 	}
 
+	// se multiplica
+	if l.Source[l.Position] == '*' {
+		l.Next = token.Token{
+			Type:  token.MULT,
+			Value: "*",
+		}
+		l.Position++
+		return
+	}
+
+	// se divide
+	if l.Source[l.Position] == '/' {
+		l.Next = token.Token{
+			Type:  token.DIV,
+			Value: "/",
+		}
+		l.Position++
+		return
+	}
+
+	// se abre parêntese
+	if l.Source[l.Position] == '(' {
+		l.Next = token.Token{
+			Type:  token.LPAREN,
+			Value: "()",
+		}
+		l.Position++
+		return
+	}
+
+	// se fecha parêntese
+	if l.Source[l.Position] == ')' {
+		l.Next = token.Token{
+			Type:  token.RPAREN,
+			Value: ")",
+		}
+		l.Position++
+		return
+	}
+
+	// se número, não deve ter ifs
 	if l.Source[l.Position] >= '0' && l.Source[l.Position] <= '9' {
 		number := "" // inicializa vazia para armanzenar o número
 
@@ -63,6 +107,7 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 		return
 	}
 
+	// se inválido
 	panic("[Lexer] Token inválido: " + string(l.Source[l.Position]))
 }
 

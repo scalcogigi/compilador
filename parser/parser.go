@@ -27,6 +27,7 @@ func Run(code string) int {
 	return result
 }
 
+// TO DO - REFATORAR - não abre usando selectNext()
 func (p *Parser) parseExpression() int {
 	
 	if p.Lex.Next.Type != token.INT {
@@ -55,3 +56,5 @@ func (p *Parser) parseExpression() int {
 	}
 	return result
 }
+
+// TODO - PARSER_EXPRESSION, PARSER_TERM, PARSER_FACTOR
