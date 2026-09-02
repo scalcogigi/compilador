@@ -9,6 +9,7 @@ const (
 	DIV         = "DIV"         // /
 	OPEN_PAREN  = "OPEN_PAREN"  // (
 	CLOSE_PAREN = "CLOSE_PAREN" // )
+	POWER = "POWER" // **
 )
 
 type Token struct {

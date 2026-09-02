@@ -14,7 +14,7 @@ type Lexer struct {
 
 func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 
-	for l.Position < len(l.Source) && l.Source[l.Position] == ' ' {
+	for l.Position < len(l.Source) && l.Source[l.Position] == ' '  {
 		l.Position++
 	}
 
@@ -47,6 +47,18 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 		return
 	}
 
+	// se potencia
+	if l.Position+1 < len(l.Source) &&
+		l.Source[l.Position:l.Position+2] == "**" {
+
+		l.Next = token.Token{
+			Type:  token.POWER,
+			Value: "**",
+		}
+		l.Position += 2
+		return
+	}
+
 	// se multiplica
 	if l.Source[l.Position] == '*' {
 		l.Next = token.Token{
@@ -56,6 +68,7 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 		l.Position++
 		return
 	}
+
 
 	// se divide
 	if l.Source[l.Position] == '/' {
@@ -96,7 +109,7 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 		}
 		numberInt, err := strconv.Atoi(number) // ASCII to int
 		if err != nil {
-			panic("[Lexer] Type must be a pointer, channel, func, interface, map, or slice type!")
+			panic("[Lexer] Invalid number!")
 		}
 
 		l.Next = token.Token{
