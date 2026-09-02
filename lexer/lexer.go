@@ -70,8 +70,8 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 	// se abre parêntese
 	if l.Source[l.Position] == '(' {
 		l.Next = token.Token{
-			Type:  token.LPAREN,
-			Value: "()",
+			Type:  token.OPEN_PAREN,
+			Value: "(",
 		}
 		l.Position++
 		return
@@ -80,7 +80,7 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 	// se fecha parêntese
 	if l.Source[l.Position] == ')' {
 		l.Next = token.Token{
-			Type:  token.RPAREN,
+			Type:  token.CLOSE_PAREN,
 			Value: ")",
 		}
 		l.Position++

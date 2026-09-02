@@ -3,16 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
-	"compilador/parser"
 )
 
 func main() {
-	if len(os.Args) != 2 {
-	panic("uso: go run . \"1+2\"")
-	}
-	expr := os.Args[1]
-	result := parser.Run(expr)
-	fmt.Println(result)
+	fmt.Printf("len(os.Args) = %d\n", len(os.Args))
+	fmt.Printf("%q\n", os.Args)
 }
-
-// processa os elementos, retorna o resultado e printa
