@@ -3,7 +3,7 @@ package parser
 import (
 	"compilador/lexer"
 	"compilador/token"
-	"math"
+	"compilador/node"
 )
 
 type Parser struct {
@@ -11,7 +11,7 @@ type Parser struct {
 }
 
 // deve ser estático
-func Run(code string) int {
+func Run(code string) node.Node {
 	lex := lexer.New(code)
 
 	parser := &Parser{
@@ -29,7 +29,7 @@ func Run(code string) int {
 }
 
 // chama o número e depois chama o operador(+ ou -) e o próximo número, até que não haja mais operadores
-func (p *Parser) parseExpression() int {
+func (p *Parser) parseExpression() node.Node {
 
 	result := p.parseTerm()
 
@@ -40,19 +40,16 @@ func (p *Parser) parseExpression() int {
 
 		value := p.parseTerm()
 
-		switch operator {
-		case token.PLUS:
-			result += value
-		case token.MINUS:
-			result -= value
+		result = node.BinOp{
+			Value: operator,
+			Children: []node.Node{result, value},
 		}
-
 	}
-	return result
+	return result	
 }
 
 // chama o número e depois chama o operador (* ou /) e o próximo número, até que não haja mais operadores
-func (p *Parser) parseTerm() int {
+func (p *Parser) parseTerm() node.Node {
 
 	result := p.parseFactor()
 
@@ -63,18 +60,16 @@ func (p *Parser) parseTerm() int {
 
 		value := p.parseFactor()
 
-		switch operator {
-		case token.MULT:
-			result *= value
-		case token.DIV:
-			result /= value
+		result = node.BinOp{
+			Value: operator,
+			Children: []node.Node{result, value},
 		}
 	}
 	return result
 }
 
 // operadores unários (+ e -)
-func (p *Parser) parseFactor() int {
+func (p *Parser) parseFactor() node.Node {
 
 	if p.Lex.Next.Type == token.PLUS ||
 		p.Lex.Next.Type == token.MINUS {
@@ -84,17 +79,16 @@ func (p *Parser) parseFactor() int {
 
 		value := p.parseFactor()
 
-		if operator == token.MINUS {
-			return -value
+		return node.UnOp{
+			Value: operator,
+			Children: []node.Node{value},
 		}
-
-		return value
 	}
 
 	return p.parsePower()
 }
 
-func (p *Parser) parsePower() int {
+func (p *Parser) parsePower() node.Node {
 	base := p.parsePrimary()
 
 	if p.Lex.Next.Type == token.POWER {
@@ -102,19 +96,24 @@ func (p *Parser) parsePower() int {
 
 		exponent := p.parseFactor()
 
-		return int(math.Pow(float64(base), float64(exponent)))
+		return node.BinOp{
+			Value: token.POWER,
+			Children: []node.Node{base, exponent},
+		}
 	}
 
 	return base
 }
 
-func (p *Parser) parsePrimary() int {
+func (p *Parser) parsePrimary() node.Node {
 
 	if p.Lex.Next.Type == token.INT {
 		value := p.Lex.Next.Value.(int)
 
 		p.Lex.SelectNext()
-		return value
+		return node.IntVal{
+			Value: value,
+		}
 	}
 
 	if p.Lex.Next.Type == token.OPEN_PAREN {
