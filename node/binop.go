@@ -1,6 +1,9 @@
 package node
 
-import ("compilador/token")
+import (
+	"compilador/token"
+	"math"
+)
 
 type BinOp struct {
 	Value string
@@ -23,6 +26,11 @@ func (b BinOp) Evaluate() int {
 			panic("[Semantic] divisão por zero")
 		}
 		return leftValue / rightValue
+	case token.POWER:
+		return int(math.Pow(
+			float64(leftValue),
+			float64(rightValue),
+		))
 	default:
 		panic("[Semantic] operador binário inválido: " + b.Value)
 	}

@@ -80,6 +80,16 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 		return
 	}
 
+	// se fatorial
+	if l.Source[l.Position] == '!' {
+		l.Next = token.Token{
+			Type:  token.FACT,
+			Value: "!",
+		}
+		l.Position++
+		return
+	}
+
 	// se abre parêntese
 	if l.Source[l.Position] == '(' {
 		l.Next = token.Token{

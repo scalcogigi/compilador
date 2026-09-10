@@ -2,8 +2,8 @@ package parser
 
 import (
 	"compilador/lexer"
-	"compilador/token"
 	"compilador/node"
+	"compilador/token"
 )
 
 type Parser struct {
@@ -89,7 +89,7 @@ func (p *Parser) parseFactor() node.Node {
 }
 
 func (p *Parser) parsePower() node.Node {
-	base := p.parsePrimary()
+	base := p.parsePostfix()
 
 	if p.Lex.Next.Type == token.POWER {
 		p.Lex.SelectNext() // consome "**"
@@ -103,6 +103,21 @@ func (p *Parser) parsePower() node.Node {
 	}
 
 	return base
+}
+
+func (p *Parser) parsePostfix() node.Node {
+	result := p.parsePrimary()
+
+	for p.Lex.Next.Type == token.FACT {
+		p.Lex.SelectNext() // consome "!"
+
+		result = node.UnOp{
+			Value:    token.FACT,
+			Children: []node.Node{result},
+		}
+	}
+
+	return result
 }
 
 func (p *Parser) parsePrimary() node.Node {

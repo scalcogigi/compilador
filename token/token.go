@@ -10,6 +10,7 @@ const (
 	OPEN_PAREN  = "OPEN_PAREN"  // (
 	CLOSE_PAREN = "CLOSE_PAREN" // )
 	POWER = "POWER" // **
+	FACT = "FACT"
 )
 
 type Token struct {
