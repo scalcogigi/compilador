@@ -2,6 +2,7 @@ package node
 
 import (
 	"compilador/token"
+	"compilador/symboltable"
 	"math"
 )
 
@@ -10,9 +11,9 @@ type BinOp struct {
 	Children []Node
 }
 
-func (b BinOp) Evaluate() int {
-	leftValue := b.Children[0].Evaluate()
-	rightValue := b.Children[1].Evaluate()
+func (b BinOp) Evaluate(st symboltable.SymbolTable) int {
+	leftValue := b.Children[0].Evaluate(st)
+	rightValue := b.Children[1].Evaluate(st)
 
 	switch b.Value {
 	case token.PLUS:

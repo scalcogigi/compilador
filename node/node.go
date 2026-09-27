@@ -1,5 +1,5 @@
 package node
 
 type Node interface {
-    Evaluate() int
+    Evaluate(st *SymbolTable) int
 }

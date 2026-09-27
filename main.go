@@ -5,6 +5,8 @@ import (
 	"os"
 	
 	"compilador/parser"
+	"compilador/symboltable"
+	"compilador/prepro"
 )
 
 func main() {
@@ -13,7 +15,9 @@ func main() {
 	}
 	expr := os.Args[1]
 	result := parser.Run(expr)
-	fmt.Println(result.Evaluate())
+	expr = prepro.Filter(expr)
+	st := symboltable.New()
+	fmt.Println(result.Evaluate(st))
 }
 
 // processa os elementos, retorna o resultado e printa

@@ -28,6 +28,38 @@ func Run(code string) node.Node {
 	return result
 }
 
+// parseProgram
+func (p *Parser) parseProgram() node.Node {
+	result := p.parseStatement()
+	return result
+}
+
+// parseStatement
+func (p *Parser) parseStatement() node.Node {
+	if p.Lex.Next.Type == token.IDEN {
+		identifier := p.Lex.Next.Value.(string)
+		p.Lex.SelectNext() // consome o identificador
+
+		if p.Lex.Next.Type != token.ASSIGN {
+			panic("[Parser] Esperado '=', mas encontrado: " + p.Lex.Next.Type)
+		}
+		p.Lex.SelectNext() // consome '='
+
+		expression := p.parseExpression()
+
+		if p.Lex.Next.Type != token.END {
+			panic("[Parser] Esperado ';', mas encontrado: " + p.Lex.Next.Type)
+		}
+		p.Lex.SelectNext() // consome ';'
+
+		return node.Assignment{
+			Identifier: identifier,
+			Expression: expression,
+		}
+	}
+	return node.Empty{}
+}
+
 // chama o número e depois chama o operador(+ ou -) e o próximo número, até que não haja mais operadores
 func (p *Parser) parseExpression() node.Node {
 
@@ -146,3 +178,4 @@ func (p *Parser) parsePrimary() node.Node {
 
 	panic("[Parser] Expressão primária inválida: " + p.Lex.Next.Type)
 }
+

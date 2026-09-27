@@ -1,14 +1,17 @@
 package node
 
-import ("compilador/token")
+import (
+	"compilador/token"
+	"compilador/symboltable"
+)
 
 type UnOp struct {
 	Value string
 	Children []Node
 }
 
-func (u UnOp) Evaluate() int {
-	value := u.Children[0].Evaluate() // fica no primeiro filho
+func (u UnOp) Evaluate(st symboltable.SymbolTable) int {
+	value := u.Children[0].Evaluate(st) // fica no primeiro filho
 
 	switch u.Value {
 

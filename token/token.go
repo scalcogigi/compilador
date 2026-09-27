@@ -11,6 +11,10 @@ const (
 	CLOSE_PAREN = "CLOSE_PAREN" // )
 	POWER = "POWER" // **
 	FACT = "FACT"
+	ASSIGN = "ASSIGN" // =
+	END = "END" // ;
+	PRINT = "PRINT" // print
+	IDEN = "IDEN" // variável
 )
 
 type Token struct {
