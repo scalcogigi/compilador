@@ -3,6 +3,7 @@ package lexer
 import (
 	"compilador/token"
 	"strconv"
+	"fmt"
 )
 
 // gera tokens - definindo variáveis e funções
@@ -14,8 +15,20 @@ type Lexer struct {
 
 func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 
-	for l.Position < len(l.Source) && l.Source[l.Position] == ' '  {
+	for l.Position < len(l.Source) && (l.Source[l.Position] == ' ' ||
+		l.Source[l.Position] == '\t' || l.Source[l.Position] == '\r') {
 		l.Position++
+	}
+
+	// Quebra de linha indica o fim de uma instrução.
+	if l.Position < len(l.Source) && l.Source[l.Position] == '\n' {
+		l.Next = token.Token{
+			Type:  token.END,
+			Value: "\n",
+		}
+		l.Position++
+		fmt.Printf("TOKEN -> %s (%v)\n", l.Next.Type, l.Next.Value)
+		return
 	}
 
 	// se vazio
@@ -24,6 +37,7 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 			Type:  token.EOF,
 			Value: "",
 		}
+		fmt.Printf("TOKEN -> %s (%v)\n", l.Next.Type, l.Next.Value)
 		return
 	}
 
@@ -34,6 +48,7 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 			Value: "+",
 		}
 		l.Position++
+		fmt.Printf("TOKEN -> %s (%v)\n", l.Next.Type, l.Next.Value)
 		return
 	}
 
@@ -44,6 +59,7 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 			Value: "-",
 		}
 		l.Position++
+		fmt.Printf("TOKEN -> %s (%v)\n", l.Next.Type, l.Next.Value)
 		return
 	}
 
@@ -56,6 +72,7 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 			Value: "**",
 		}
 		l.Position += 2
+		fmt.Printf("TOKEN -> %s (%v)\n", l.Next.Type, l.Next.Value)
 		return
 	}
 
@@ -66,9 +83,9 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 			Value: "*",
 		}
 		l.Position++
+		fmt.Printf("TOKEN -> %s (%v)\n", l.Next.Type, l.Next.Value)
 		return
 	}
-
 
 	// se divide
 	if l.Source[l.Position] == '/' {
@@ -77,6 +94,18 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 			Value: "/",
 		}
 		l.Position++
+		fmt.Printf("TOKEN -> %s (%v)\n", l.Next.Type, l.Next.Value)
+		return
+	}
+
+	// se atribui
+	if l.Source[l.Position] == '=' {
+		l.Next = token.Token{
+			Type:  token.ASSIGN,
+			Value: "=",
+		}
+		l.Position++
+		fmt.Printf("TOKEN -> %s (%v)\n", l.Next.Type, l.Next.Value)
 		return
 	}
 
@@ -87,6 +116,7 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 			Value: "!",
 		}
 		l.Position++
+		fmt.Printf("TOKEN -> %s (%v)\n", l.Next.Type, l.Next.Value)
 		return
 	}
 
@@ -97,6 +127,7 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 			Value: "(",
 		}
 		l.Position++
+		fmt.Printf("TOKEN -> %s (%v)\n", l.Next.Type, l.Next.Value)
 		return
 	}
 
@@ -107,15 +138,47 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 			Value: ")",
 		}
 		l.Position++
+		fmt.Printf("TOKEN -> %s (%v)\n", l.Next.Type, l.Next.Value)
+		return
+	}
+
+	// Se for identificador ou palavra reservada.
+	if isLetter(l.Source[l.Position]) {
+		identifier := ""
+
+		// Continua enquanto houver letra, número ou "_".
+		for l.Position < len(l.Source) &&
+			(isLetter(l.Source[l.Position]) ||
+				isDigit(l.Source[l.Position]) ||
+				l.Source[l.Position] == '_') {
+
+			identifier += string(l.Source[l.Position])
+			l.Position++
+		}
+
+		// Verifica se é a palavra reservada Println.
+		if identifier == "Println" {
+			l.Next = token.Token{
+				Type:  token.PRINT,
+				Value: identifier,
+			}
+		} else {
+			l.Next = token.Token{
+				Type:  token.IDEN,
+				Value: identifier,
+			}
+		}
+		fmt.Printf("TOKEN -> %s (%v)\n", l.Next.Type, l.Next.Value)
 		return
 	}
 
 	// se número, não deve ter ifs
-	if l.Source[l.Position] >= '0' && l.Source[l.Position] <= '9' {
-		number := "" // inicializa vazia para armanzenar o número
+	if isDigit(l.Source[l.Position]) {
+		number := ""
 
-		for ; l.Position < len(l.Source) && l.Source[l.Position] >= '0' && l.Source[l.Position] <= '9'; l.Position++ {
+		for l.Position < len(l.Source) && isDigit(l.Source[l.Position]) {
 			number += string(l.Source[l.Position])
+			l.Position++
 		}
 		numberInt, err := strconv.Atoi(number) // ASCII to int
 		if err != nil {
@@ -127,6 +190,7 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 			Value: numberInt,
 		}
 
+		fmt.Printf("TOKEN -> %s (%v)\n", l.Next.Type, l.Next.Value)
 		return
 	}
 
@@ -140,4 +204,14 @@ func New(source string) *Lexer {
 		Source:   source,
 		Position: 0,
 	}
+}
+
+// funções auxiliares
+func isLetter(char byte) bool {
+	return (char >= 'a' && char <= 'z') ||
+		(char >= 'A' && char <= 'Z')
+}
+
+func isDigit(char byte) bool {
+	return char >= '0' && char <= '9'
 }

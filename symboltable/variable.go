@@ -1,5 +1,5 @@
 package symboltable
 
 type Variable struct {
-    Value int
+	Value int
 }

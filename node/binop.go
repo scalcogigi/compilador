@@ -1,13 +1,13 @@
 package node
 
 import (
-	"compilador/token"
 	"compilador/symboltable"
+	"compilador/token"
 	"math"
 )
 
 type BinOp struct {
-	Value string
+	Value    string
 	Children []Node
 }
 

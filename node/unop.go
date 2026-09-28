@@ -1,12 +1,12 @@
 package node
 
 import (
-	"compilador/token"
 	"compilador/symboltable"
+	"compilador/token"
 )
 
 type UnOp struct {
-	Value string
+	Value    string
 	Children []Node
 }
 
@@ -20,7 +20,7 @@ func (u UnOp) Evaluate(st symboltable.SymbolTable) int {
 
 	case token.MINUS:
 		return -value
-		
+
 	case token.FACT:
 		if value < 0 {
 			panic("[Semantic] fatorial de número negativo")
@@ -33,7 +33,7 @@ func (u UnOp) Evaluate(st symboltable.SymbolTable) int {
 		}
 
 		return result
-		default:
-			panic("[Semantic] operador unário inválido: " + u.Value)
-		}
+	default:
+		panic("[Semantic] operador unário inválido: " + u.Value)
+	}
 }

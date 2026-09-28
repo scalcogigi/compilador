@@ -12,7 +12,7 @@ const (
 	POWER = "POWER" // **
 	FACT = "FACT"
 	ASSIGN = "ASSIGN" // =
-	END = "END" // ;
+	END = "END" // \n
 	PRINT = "PRINT" // print
 	IDEN = "IDEN" // variável
 )

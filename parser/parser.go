@@ -4,6 +4,7 @@ import (
 	"compilador/lexer"
 	"compilador/node"
 	"compilador/token"
+	"fmt"
 )
 
 type Parser struct {
@@ -19,7 +20,7 @@ func Run(code string) node.Node {
 	}
 
 	parser.Lex.SelectNext()
-	result := parser.parseExpression()
+	result := parser.parseProgram()
 
 	if parser.Lex.Next.Type != token.EOF {
 		panic("[Parser] Esperado EOF, mas encontrado: " + parser.Lex.Next.Type)
@@ -30,34 +31,84 @@ func Run(code string) node.Node {
 
 // parseProgram
 func (p *Parser) parseProgram() node.Node {
-	result := p.parseStatement()
-	return result
+	statements := []node.Node{}
+
+	for p.Lex.Next.Type != token.EOF {
+		statement := p.parseStatement()
+		statements = append(statements, statement)
+	}
+
+	return node.Block{
+		Children: statements,
+	}
 }
 
 // parseStatement
 func (p *Parser) parseStatement() node.Node {
+	fmt.Printf("Statement começa com: %s (%v)\n",
+		p.Lex.Next.Type,
+		p.Lex.Next.Value,
+	)
+	// vazio
+	if p.Lex.Next.Type == token.END {
+		p.Lex.SelectNext()
+		return node.NoOp{}
+	}
+
+	// atribuição
 	if p.Lex.Next.Type == token.IDEN {
 		identifier := p.Lex.Next.Value.(string)
-		p.Lex.SelectNext() // consome o identificador
+		p.Lex.SelectNext()
 
 		if p.Lex.Next.Type != token.ASSIGN {
 			panic("[Parser] Esperado '=', mas encontrado: " + p.Lex.Next.Type)
 		}
-		p.Lex.SelectNext() // consome '='
+		fmt.Printf("TOKEN -> %s (%v)\n", p.Lex.Next.Type, p.Lex.Next.Value)
+		p.Lex.SelectNext()
 
 		expression := p.parseExpression()
 
 		if p.Lex.Next.Type != token.END {
-			panic("[Parser] Esperado ';', mas encontrado: " + p.Lex.Next.Type)
+			panic("[Parser] Esperado fim de linha, mas encontrado: " + p.Lex.Next.Type)
 		}
-		p.Lex.SelectNext() // consome ';'
+		p.Lex.SelectNext()
 
 		return node.Assignment{
-			Identifier: identifier,
-			Expression: expression,
+			Children: []node.Node{
+				node.Identifier{Value: identifier},
+				expression,
+			},
 		}
 	}
-	return node.Empty{}
+
+	if p.Lex.Next.Type == token.PRINT {
+		p.Lex.SelectNext()
+
+		if p.Lex.Next.Type != token.OPEN_PAREN {
+			panic("[Parser] Esperado '(', mas encontrado: " + p.Lex.Next.Type)
+		}
+		p.Lex.SelectNext()
+
+		expression := p.parseExpression()
+
+		if p.Lex.Next.Type != token.CLOSE_PAREN {
+			panic("[Parser] Esperado ')', mas encontrado: " + p.Lex.Next.Type)
+		}
+		p.Lex.SelectNext()
+
+		if p.Lex.Next.Type != token.END {
+			panic("[Parser] Esperado fim de linha, mas encontrado: " + p.Lex.Next.Type)
+		}
+		p.Lex.SelectNext()
+
+		return node.Println{
+			Children: []node.Node{
+				expression,
+			},
+		}
+	}
+
+	panic("[Parser] Instrução inválida: " + p.Lex.Next.Type)
 }
 
 // chama o número e depois chama o operador(+ ou -) e o próximo número, até que não haja mais operadores
@@ -73,11 +124,11 @@ func (p *Parser) parseExpression() node.Node {
 		value := p.parseTerm()
 
 		result = node.BinOp{
-			Value: operator,
+			Value:    operator,
 			Children: []node.Node{result, value},
 		}
 	}
-	return result	
+	return result
 }
 
 // chama o número e depois chama o operador (* ou /) e o próximo número, até que não haja mais operadores
@@ -93,7 +144,7 @@ func (p *Parser) parseTerm() node.Node {
 		value := p.parseFactor()
 
 		result = node.BinOp{
-			Value: operator,
+			Value:    operator,
 			Children: []node.Node{result, value},
 		}
 	}
@@ -112,7 +163,7 @@ func (p *Parser) parseFactor() node.Node {
 		value := p.parseFactor()
 
 		return node.UnOp{
-			Value: operator,
+			Value:    operator,
 			Children: []node.Node{value},
 		}
 	}
@@ -129,7 +180,7 @@ func (p *Parser) parsePower() node.Node {
 		exponent := p.parseFactor()
 
 		return node.BinOp{
-			Value: token.POWER,
+			Value:    token.POWER,
 			Children: []node.Node{base, exponent},
 		}
 	}
@@ -163,6 +214,15 @@ func (p *Parser) parsePrimary() node.Node {
 		}
 	}
 
+	if p.Lex.Next.Type == token.IDEN {
+		identifier := p.Lex.Next.Value.(string)
+		p.Lex.SelectNext()
+
+		return node.Identifier{
+			Value: identifier,
+		}
+	}
+
 	if p.Lex.Next.Type == token.OPEN_PAREN {
 		p.Lex.SelectNext() // consome "("
 
@@ -178,4 +238,3 @@ func (p *Parser) parsePrimary() node.Node {
 
 	panic("[Parser] Expressão primária inválida: " + p.Lex.Next.Type)
 }
-

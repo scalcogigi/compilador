@@ -1,5 +1,7 @@
 package node
 
+import "compilador/symboltable"
+
 type Node interface {
-    Evaluate(st *SymbolTable) int
+	Evaluate(st symboltable.SymbolTable) int
 }
