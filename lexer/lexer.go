@@ -3,7 +3,6 @@ package lexer
 import (
 	"compilador/token"
 	"strconv"
-	"fmt"
 )
 
 // gera tokens - definindo variáveis e funções
@@ -27,7 +26,7 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 			Value: "\n",
 		}
 		l.Position++
-		fmt.Printf("TOKEN -> %s (%v)\n", l.Next.Type, l.Next.Value)
+
 		return
 	}
 
@@ -37,7 +36,7 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 			Type:  token.EOF,
 			Value: "",
 		}
-		fmt.Printf("TOKEN -> %s (%v)\n", l.Next.Type, l.Next.Value)
+
 		return
 	}
 
@@ -48,7 +47,7 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 			Value: "+",
 		}
 		l.Position++
-		fmt.Printf("TOKEN -> %s (%v)\n", l.Next.Type, l.Next.Value)
+
 		return
 	}
 
@@ -59,7 +58,7 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 			Value: "-",
 		}
 		l.Position++
-		fmt.Printf("TOKEN -> %s (%v)\n", l.Next.Type, l.Next.Value)
+
 		return
 	}
 
@@ -72,7 +71,7 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 			Value: "**",
 		}
 		l.Position += 2
-		fmt.Printf("TOKEN -> %s (%v)\n", l.Next.Type, l.Next.Value)
+
 		return
 	}
 
@@ -83,7 +82,7 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 			Value: "*",
 		}
 		l.Position++
-		fmt.Printf("TOKEN -> %s (%v)\n", l.Next.Type, l.Next.Value)
+
 		return
 	}
 
@@ -94,7 +93,7 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 			Value: "/",
 		}
 		l.Position++
-		fmt.Printf("TOKEN -> %s (%v)\n", l.Next.Type, l.Next.Value)
+
 		return
 	}
 
@@ -105,7 +104,7 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 			Value: "=",
 		}
 		l.Position++
-		fmt.Printf("TOKEN -> %s (%v)\n", l.Next.Type, l.Next.Value)
+
 		return
 	}
 
@@ -116,7 +115,7 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 			Value: "!",
 		}
 		l.Position++
-		fmt.Printf("TOKEN -> %s (%v)\n", l.Next.Type, l.Next.Value)
+
 		return
 	}
 
@@ -127,7 +126,7 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 			Value: "(",
 		}
 		l.Position++
-		fmt.Printf("TOKEN -> %s (%v)\n", l.Next.Type, l.Next.Value)
+
 		return
 	}
 
@@ -138,7 +137,7 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 			Value: ")",
 		}
 		l.Position++
-		fmt.Printf("TOKEN -> %s (%v)\n", l.Next.Type, l.Next.Value)
+
 		return
 	}
 
@@ -168,7 +167,7 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 				Value: identifier,
 			}
 		}
-		fmt.Printf("TOKEN -> %s (%v)\n", l.Next.Type, l.Next.Value)
+
 		return
 	}
 
@@ -190,7 +189,7 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 			Value: numberInt,
 		}
 
-		fmt.Printf("TOKEN -> %s (%v)\n", l.Next.Type, l.Next.Value)
+
 		return
 	}
 

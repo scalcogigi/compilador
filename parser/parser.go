@@ -4,7 +4,6 @@ import (
 	"compilador/lexer"
 	"compilador/node"
 	"compilador/token"
-	"fmt"
 )
 
 type Parser struct {
@@ -45,10 +44,6 @@ func (p *Parser) parseProgram() node.Node {
 
 // parseStatement
 func (p *Parser) parseStatement() node.Node {
-	fmt.Printf("Statement começa com: %s (%v)\n",
-		p.Lex.Next.Type,
-		p.Lex.Next.Value,
-	)
 	// vazio
 	if p.Lex.Next.Type == token.END {
 		p.Lex.SelectNext()
@@ -63,7 +58,6 @@ func (p *Parser) parseStatement() node.Node {
 		if p.Lex.Next.Type != token.ASSIGN {
 			panic("[Parser] Esperado '=', mas encontrado: " + p.Lex.Next.Type)
 		}
-		fmt.Printf("TOKEN -> %s (%v)\n", p.Lex.Next.Type, p.Lex.Next.Value)
 		p.Lex.SelectNext()
 
 		expression := p.parseExpression()

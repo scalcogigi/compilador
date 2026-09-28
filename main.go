@@ -1,11 +1,10 @@
 package main
 
 import (
-	"os"
-	"fmt"
 	"compilador/parser"
-	"compilador/symboltable"
 	"compilador/prepro"
+	"compilador/symboltable"
+	"os"
 )
 
 func main() {
@@ -22,7 +21,6 @@ func main() {
 	codigo := string(conteudo) + "\n"
 	codigo = prepro.Filter(codigo)
 
-	fmt.Printf("%q\n", codigo)
 	result := parser.Run(codigo)
 
 	st := symboltable.New()

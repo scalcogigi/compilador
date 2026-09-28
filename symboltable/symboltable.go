@@ -26,7 +26,7 @@ func (st SymbolTable) Get(name string) int {
 	variable, exists := st.Find(name)
 
 	if !exists {
-		panic("[SymbolTable] Variável não definida: " + name)
+		panic("[Semantic] Variável não definida: " + name)
 	}
 
 	return variable.Value

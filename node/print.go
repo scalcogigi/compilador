@@ -2,7 +2,6 @@ package node
 
 import (
 	"compilador/symboltable"
-	"fmt"
 )
 
 type Println struct {
@@ -14,6 +13,6 @@ func (p Println) Evaluate(st symboltable.SymbolTable) int {
 		panic("[Println] Esperado um filho")
 	}
 	value := p.Children[0].Evaluate(st)
-	fmt.Println(value)
+	println(value)
 	return value
 }
