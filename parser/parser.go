@@ -42,6 +42,30 @@ func (p *Parser) parseProgram() node.Node {
 	}
 }
 
+// parseBlock
+func (p *Parser) parseBlock() node.Node {
+	if p.Lex.Next.Type != token.OPEN_BRA {
+		panic("[Parser] Esperado '{', mas encontrado: " + p.Lex.Next.Type)
+	}
+	p.Lex.SelectNext() // consome token
+
+	statements := []node.Node{}
+
+	for p.Lex.Next.Type != token.CLOSE_BRA {
+		statement := p.parseStatement()
+		statements = append(statements, statement)
+	}
+
+	if p.Lex.Next.Type != token.CLOSE_BRA {
+		panic("[Parser] Esperado '}', mas encontrado: " + p.Lex.Next.Type)
+	}
+	p.Lex.SelectNext() // consome token
+
+	return node.Block{
+		Children: statements,
+	}
+}
+
 // parseStatement
 func (p *Parser) parseStatement() node.Node {
 	// vazio
@@ -75,6 +99,96 @@ func (p *Parser) parseStatement() node.Node {
 		}
 	}
 
+	// condicional
+	if p.Lex.Next.Type == token.IF {
+		p.Lex.SelectNext()
+
+		if p.Lex.Next.Type != token.OPEN_PAREN {
+			panic("[Parser] Esperado '(', mas encontrado: " + p.Lex.Next.Type)
+		}
+		p.Lex.SelectNext()
+
+		expression := p.parseExpression()
+
+		if p.Lex.Next.Type != token.CLOSE_PAREN {
+			panic("[Parser] Esperado ')', mas encontrado: " + p.Lex.Next.Type)
+		}
+		p.Lex.SelectNext()
+
+		if p.Lex.Next.Type != token.END {
+			panic("[Parser] Esperado fim de linha, mas encontrado: " + p.Lex.Next.Type)
+		}
+		p.Lex.SelectNext()
+
+		return node.IF{
+			Children: []node.Node{
+				expression,
+			},
+		}
+	}
+
+	// while
+	if p.Lex.Next.Type == token.WHILE {
+		p.Lex.SelectNext()
+
+		if p.Lex.Next.Type != token.OPEN_PAREN {
+			panic("[Parser] Esperado '(', mas encontrado: " + p.Lex.Next.Type)
+		}	
+		p.Lex.SelectNext()
+
+		expression := p.parseExpression()
+		
+		if p.Lex.Next.Type != token.CLOSE_PAREN {
+			panic("[Parser] Esperado ')', mas encontrado: " + p.Lex.Next.Type)
+		}
+
+		p.Lex.SelectNext()
+
+		if p.Lex.Next.Type != token.END {
+			panic("[Parser] Esperado fim de linha, mas encontrado: " + p.Lex.Next.Type)
+		}
+		p.Lex.SelectNext()
+
+		return node.While{
+			Children: []node.Node{
+				expression,
+			},
+		}
+	}
+
+	// Scanln
+	if p.Lex.Next.Type == token.READ {
+		p.Lex.SelectNext()
+
+		if p.Lex.Next.Type != token.OPEN_PAREN {
+			panic("[Parser] Esperado '(', mas encontrado: " + p.Lex.Next.Type)
+		}
+		p.Lex.SelectNext()
+
+		if p.Lex.Next.Type != token.IDEN {
+			panic("[Parser] Esperado identificador, mas encontrado: " + p.Lex.Next.Type)
+		}
+		identifier := p.Lex.Next.Value.(string)
+		p.Lex.SelectNext()
+
+		if p.Lex.Next.Type != token.CLOSE_PAREN {
+			panic("[Parser] Esperado ')', mas encontrado: " + p.Lex.Next.Type)
+		}
+		p.Lex.SelectNext()
+
+		if p.Lex.Next.Type != token.END {
+			panic("[Parser] Esperado fim de linha, mas encontrado: " + p.Lex.Next.Type)
+		}
+		p.Lex.SelectNext()
+
+		return node.ScanLn{
+			Children: []node.Node{
+				node.Identifier{Value: identifier},
+			},
+		}
+	}
+
+	// print
 	if p.Lex.Next.Type == token.PRINT {
 		p.Lex.SelectNext()
 
@@ -149,10 +263,11 @@ func (p *Parser) parseTerm() node.Node {
 func (p *Parser) parseFactor() node.Node {
 
 	if p.Lex.Next.Type == token.PLUS ||
-		p.Lex.Next.Type == token.MINUS {
+		p.Lex.Next.Type == token.MINUS ||
+		p.Lex.Next.Type == token.NOT {
 
 		operator := p.Lex.Next.Type
-		p.Lex.SelectNext() // consome "+" ou "-"
+		p.Lex.SelectNext() // consome token
 
 		value := p.parseFactor()
 
@@ -166,7 +281,7 @@ func (p *Parser) parseFactor() node.Node {
 }
 
 func (p *Parser) parsePower() node.Node {
-	base := p.parsePostfix()
+	base := p.parsePrimary()
 
 	if p.Lex.Next.Type == token.POWER {
 		p.Lex.SelectNext() // consome "**"
@@ -180,21 +295,6 @@ func (p *Parser) parsePower() node.Node {
 	}
 
 	return base
-}
-
-func (p *Parser) parsePostfix() node.Node {
-	result := p.parsePrimary()
-
-	for p.Lex.Next.Type == token.FACT {
-		p.Lex.SelectNext() // consome "!"
-
-		result = node.UnOp{
-			Value:    token.FACT,
-			Children: []node.Node{result},
-		}
-	}
-
-	return result
 }
 
 func (p *Parser) parsePrimary() node.Node {
@@ -231,4 +331,59 @@ func (p *Parser) parsePrimary() node.Node {
 	}
 
 	panic("[Parser] Expressão primária inválida: " + p.Lex.Next.Type)
+}
+
+// parseBoolExpression
+func (p *Parser) parseBoolExpression() node.Node {
+	left := p.parseExpression()
+
+	if p.Lex.Next.Type == token.EQ ||
+		p.Lex.Next.Type == token.LT ||
+		p.Lex.Next.Type == token.GT {
+
+		operator := p.Lex.Next.Type
+		p.Lex.SelectNext() // consome token
+
+		right := p.parseExpression()
+
+		return node.BinOp{
+			Value:    operator,
+			Children: []node.Node{left, right},
+		}
+	}
+	return left
+}
+
+// parseBoolTerm
+func (p *Parser) parseBoolTerm() node.Node {
+	left := p.parseBoolExpression()
+
+	if p.Lex.Next.Type == token.AND {
+		operator := p.Lex.Next.Type
+		p.Lex.SelectNext() // consome token
+		right := p.parseBoolExpression()
+
+		return node.BinOp{
+			Value:    operator,
+			Children: []node.Node{left, right},
+		}
+	}	
+	return left
+}
+
+// parseRelExpression
+func (p *Parser) parseRelExpression() node.Node {
+	left := p.parseBoolTerm()
+
+	if p.Lex.Next.Type == token.OR {
+		operator := p.Lex.Next.Type
+		p.Lex.SelectNext() // consome token
+		right := p.parseBoolTerm()
+
+		return node.BinOp{
+			Value:    operator,
+			Children: []node.Node{left, right},
+		}
+	}
+	return left
 }

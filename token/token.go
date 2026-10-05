@@ -22,7 +22,7 @@ const (
 	LT          = "LT"          // <
 	GT          = "GT"          // >
 	IF          = "IF"          // if
-	FOR         = "FOR"         // for
+	WHILE       = "WHILE"       // while
 	ELSE        = "ELSE"        // else
 	READ        = "READ"        // read
 	OPEN_BRA    = "OPEN_BRA"    // {
