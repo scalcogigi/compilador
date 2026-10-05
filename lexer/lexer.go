@@ -62,6 +62,32 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 		return
 	}
 
+	// se AND
+	if l.Position+1 < len(l.Source) &&
+		l.Source[l.Position:l.Position+2] == "&&" {
+
+		l.Next = token.Token{
+			Type:  token.AND,
+			Value: "&&",
+		}
+		l.Position += 2
+
+		return
+	}
+
+	// se OR
+	if l.Position+1 < len(l.Source) &&
+		l.Source[l.Position:l.Position+2] == "||" {
+
+		l.Next = token.Token{
+			Type:  token.OR,
+			Value: "||",
+		}
+		l.Position += 2
+
+		return
+	}
+
 	// se potencia
 	if l.Position+1 < len(l.Source) &&
 		l.Source[l.Position:l.Position+2] == "**" {
@@ -97,6 +123,19 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 		return
 	}
 
+	// se EQ
+	if l.Position+1 < len(l.Source) &&
+		l.Source[l.Position:l.Position+2] == "==" {
+
+		l.Next = token.Token{
+			Type:  token.EQ,
+			Value: "==",
+		}
+		l.Position += 2
+
+		return
+	}
+
 	// se atribui
 	if l.Source[l.Position] == '=' {
 		l.Next = token.Token{
@@ -108,16 +147,61 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 		return
 	}
 
-	// se fatorial
+	// maior que
+	if l.Source[l.Position] == '>' {
+		l.Next = token.Token{
+			Type:  token.GT,
+			Value: ">",
+		}
+		l.Position++
+
+		return
+	}
+
+	// menor que
+	if l.Source[l.Position] == '<' {
+		l.Next = token.Token{
+			Type:  token.LT,
+			Value: "<",
+		}
+		l.Position++
+
+		return
+	}
+
+	// se not
 	if l.Source[l.Position] == '!' {
 		l.Next = token.Token{
-			Type:  token.FACT,
+			Type:  token.NOT,
 			Value: "!",
 		}
 		l.Position++
 
 		return
 	}
+
+	// se abre chave
+	if l.Source[l.Position] == '{' {
+		l.Next = token.Token{
+			Type:  token.OPEN_BRA,
+			Value: "{",
+		}
+		l.Position++
+
+		return
+	}
+
+	// se fecha chave
+	if l.Source[l.Position] == '}' {
+		l.Next = token.Token{
+			Type:  token.CLOSE_BRA,
+			Value: "}",
+		}
+		l.Position++
+
+		return
+	}
+
 
 	// se abre parêntese
 	if l.Source[l.Position] == '(' {
@@ -155,20 +239,49 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 			l.Position++
 		}
 
-		// Verifica se é a palavra reservada Println.
-		if identifier == "Println" {
-			l.Next = token.Token{
+		switch identifier {
+			case "Println":
+				// token PRINT
+				l.Next = token.Token{
 				Type:  token.PRINT,
 				Value: identifier,
 			}
-		} else {
-			l.Next = token.Token{
+			case "if":
+				// token IF
+				l.Next = token.Token{
+				Type:  token.IF,
+				Value: identifier,
+			}
+
+			case "for":
+				// token WHILE (ou o token definido no seu token.go)
+				l.Next = token.Token{
+				Type:  token.WHILE,
+				Value: identifier,
+			}
+
+			case "else":
+				// token ELSE
+				l.Next = token.Token{
+				Type:  token.ELSE,
+				Value: identifier,
+			}
+
+			case "Scanln":
+				// token READ
+				l.Next = token.Token{
+				Type:  token.READ,
+				Value: identifier,
+			}
+
+			default:
+				// token IDEN
+				l.Next = token.Token{
 				Type:  token.IDEN,
 				Value: identifier,
 			}
+			return 
 		}
-
-		return
 	}
 
 	// se número, não deve ter ifs

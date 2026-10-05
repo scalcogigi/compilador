@@ -10,7 +10,7 @@ const (
 	OPEN_PAREN  = "OPEN_PAREN"  // (
 	CLOSE_PAREN = "CLOSE_PAREN" // )
 	POWER       = "POWER"       // **
-	FACT        = "FACT"        // !
+	// FACT        = "FACT"        // !
 	ASSIGN      = "ASSIGN"      // =
 	END         = "END"         // \n
 	PRINT       = "PRINT"       // print
@@ -22,7 +22,7 @@ const (
 	LT          = "LT"          // <
 	GT          = "GT"          // >
 	IF          = "IF"          // if
-	WHILE       = "WHILE"       // while
+	FOR         = "FOR"         // for
 	ELSE        = "ELSE"        // else
 	READ        = "READ"        // read
 	OPEN_BRA    = "OPEN_BRA"    // {
