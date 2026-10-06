@@ -6,11 +6,11 @@
 
 ```ebnf
 PROGRAM = { STATEMENT } ;
-BLOCK = "{", { STATEMENT }, "}" ;
+BLOCK = "{", "\n", { STATEMENT }, "}" ;
 STATEMENT = (("Println", "(", BOOLEXPRESSION, ")") | ("for", BOOLEXPRESSION, BLOCK) | ("if", BOOLEXPRESSION, BLOCK, ("else", BLOCK) | ε) | (IDENTIFIER, "=", BOOLEXPRESSION) | BLOCK | ε), "\n" ;
 BOOLEXPRESSION = BOOLTERM, { "||", BOOLTERM } ;
 BOOLTERM = RELEXPRESSION, { "&&", RELEXPRESSION } ;
-RELEXPRESSION = EXPRESSION, [ ("==" | "<" | ">"), EXPRESSION ] ;
+RELEXPRESSION = EXPRESSION, { ("<" | "==" | ">"), EXPRESSION } ;
 EXPRESSION = TERM, { ("+" | "-"), TERM } ;
 TERM = FACTOR, { ("*" | "/"), FACTOR } ;
 FACTOR = NUMBER | IDENTIFIER | ("!" | "+" | "-"), FACTOR | "(", BOOLEXPRESSION, ")" | "Scanln", "(", ")" ;
