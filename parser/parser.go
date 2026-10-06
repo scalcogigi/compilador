@@ -45,6 +45,8 @@ func (p *Parser) parseBlock() node.Node {
 	}
 	p.Lex.SelectNext() // consome token
 
+	p.parseEnd()
+
 	statements := []node.Node{}
 
 	for p.Lex.Next.Type != token.CLOSE_BRA && p.Lex.Next.Type != token.EOF {
