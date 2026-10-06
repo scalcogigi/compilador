@@ -21,6 +21,12 @@ func (u UnOp) Evaluate(st symboltable.SymbolTable) int {
 	case token.MINUS:
 		return -value
 
+	case token.NOT:
+		if value == 0 {
+			return 1
+		}
+		return 0
+
 	default:
 		panic("[Semantic] operador unário inválido: " + u.Value)
 	}

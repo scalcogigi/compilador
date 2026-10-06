@@ -280,8 +280,8 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 				Type:  token.IDEN,
 				Value: identifier,
 			}
-			return 
 		}
+		return
 	}
 
 	// se número, não deve ter ifs

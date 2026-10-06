@@ -6,18 +6,14 @@ type While struct {
 	Children []Node
 }
 
-func (a While) Evaluate(st symboltable.SymbolTable) int {
-	if len(a.Children) != 2 {
-		panic("[While] Esperados dois filhos")
+func (w While) Evaluate(st symboltable.SymbolTable) int {
+	if len(w.Children) != 2 {
+		panic("[Semantic] While espera dois filhos")
 	}
 
-	identifier, ok := a.Children[0].(Identifier)
-	if !ok {
-		panic("[While] Primeiro filho deve ser um Identifier")
+	for w.Children[0].Evaluate(st) != 0 {
+		w.Children[1].Evaluate(st)
 	}
 
-	value := a.Children[1].Evaluate(st)
-	st.Insert(identifier.Value, value)
-
-	return value
+	return 0
 }

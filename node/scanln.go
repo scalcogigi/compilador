@@ -1,14 +1,19 @@
 package node
 
-import "compilador/symboltable"
+import (
+	"compilador/symboltable"
+	"fmt"
+)
 
-type ScanLn struct {
-	Children []Node
-}
+type ScanLn struct{}
 
 func (s ScanLn) Evaluate(st symboltable.SymbolTable) int {
-	if len(s.Children) != 1 {
-		panic("[ScanLn] Esperado um filho")
+	var value int
+
+	_, err := fmt.Scanln(&value)
+	if err != nil {
+		panic("[Semantic] Erro ao ler inteiro: " + err.Error())
 	}
-	return 0
+
+	return value
 }

@@ -32,6 +32,39 @@ func (b BinOp) Evaluate(st symboltable.SymbolTable) int {
 			float64(leftValue),
 			float64(rightValue),
 		))
+
+	case token.AND:
+		// Verdadeiro se ambos forem diferentes de zero.
+		if leftValue != 0 && rightValue != 0 {
+			return 1
+		}
+		return 0
+
+	case token.OR:
+		// Verdadeiro se pelo menos um for diferente de zero.
+		if leftValue != 0 || rightValue != 0 {
+			return 1
+		}
+		return 0
+
+	case token.EQ:
+		if leftValue == rightValue {
+			return 1
+		}
+		return 0
+
+	case token.LT:
+		if leftValue < rightValue {
+			return 1
+		}
+		return 0
+
+	case token.GT:
+		if leftValue > rightValue {
+			return 1
+		}
+		return 0
+
 	default:
 		panic("[Semantic] operador binário inválido: " + b.Value)
 	}
