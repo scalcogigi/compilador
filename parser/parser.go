@@ -76,6 +76,9 @@ func (p *Parser) parseStatement() node.Node {
 		p.Lex.SelectNext()
 		return node.NoOp{}
 
+	case token.OPEN_BRA:
+    	return p.parseBlock()
+
 	// atribuição
 	case token.IDEN: {
 		identifier := p.Lex.Next.Value.(string)
