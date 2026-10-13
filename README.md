@@ -7,19 +7,16 @@
 ```ebnf
 PROGRAM = { STATEMENT } ;
 BLOCK = "{", "\n", { STATEMENT }, "}" ;
-STATEMENT = BLOCK | (("Println", "(", BOOLEXPRESSION, ")") | ("for", BOOLEXPRESSION, BLOCK) | ("if", BOOLEXPRESSION, BLOCK, ("else", BLOCK) | ε) | (IDENTIFIER, "=", BOOLEXPRESSION) | VARDEC | ε), "\n" ;
+STATEMENT = (("var", IDENTIFIER, TYPE, (ε | "=", BOOLEXPRESSION)) | ("Println", "(", BOOLEXPRESSION, ")") | ("for", BOOLEXPRESSION, BLOCK) | ("if", BOOLEXPRESSION, BLOCK, (ε | "else", BLOCK)) | BLOCK | (IDENTIFIER, "=", BOOLEXPRESSION) | ε), "\n" ;
 VARDEC = "var", IDENTIFIER, TYPE, [ "=", BOOLEXPRESSION ] ;
 BOOLEXPRESSION = BOOLTERM, { "||", BOOLTERM } ;
 BOOLTERM = RELEXPRESSION, { "&&", RELEXPRESSION } ;
-RELEXPRESSION = EXPRESSION, [ ("<" | "==" | ">"), EXPRESSION ] ;
-EXPRESSION = TERM, { ("+" | "-"), TERM } ;
+RELEXPRESSION = EXPRESSION, { ("<" | "==" | ">"), EXPRESSION } ;EXPRESSION = TERM, { ("+" | "-"), TERM } ;
 TERM = FACTOR, { ("*" | "/"), FACTOR } ;
-FACTOR = ("!" | "+" | "-"), FACTOR | POWER ;
-POWER = PRIMARY, [ "**", FACTOR ] ;
-PRIMARY = NUMBER | STRING | BOOLEAN | IDENTIFIER | "(", BOOLEXPRESSION, ")" | "Scanln", "(", ")" ;
-TYPE = "int" | "string" | "bool" ;
+FACTOR = NUMBER | BOOLEAN | STRING | IDENTIFIER | ("!" | "+" | "-"), FACTOR | "(", BOOLEXPRESSION, ")" | "Scanln", "(", ")" ;
+TYPE = "string" | "int" | "bool" ;
 BOOLEAN = "true" | "false" ;
-STRING = "\"", { "..." }, "\"" ;
+STRING = '"', { "..." }, '"' ;
 IDENTIFIER = LETTER, { LETTER | DIGIT | "_" } ;
 NUMBER = DIGIT, { DIGIT } ;
 LETTER = "a" | "b" | ... | "z" | "A" | "B" | ... | "Z" ;
