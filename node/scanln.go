@@ -7,13 +7,15 @@ import (
 
 type ScanLn struct{}
 
-func (s ScanLn) Evaluate(st symboltable.SymbolTable) int {
+func (s ScanLn) Evaluate(st symboltable.SymbolTable) symboltable.Variable {
 	var value int
 
-	_, err := fmt.Scanln(&value)
-	if err != nil {
+	if _, err := fmt.Scanln(&value); err != nil {
 		panic("[Semantic] Erro ao ler inteiro: " + err.Error())
 	}
 
-	return value
+	return symboltable.Variable{
+		Value: value,
+		Type:  "int",
+	}
 }

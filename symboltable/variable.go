@@ -1,5 +1,6 @@
 package symboltable
 
 type Variable struct {
-	Value int
+	Value interface{};
+	Type string
 }

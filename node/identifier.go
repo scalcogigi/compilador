@@ -6,6 +6,6 @@ type Identifier struct {
 	Value string
 }
 
-func (i Identifier) Evaluate(st symboltable.SymbolTable) int {
+func (i Identifier) Evaluate(st symboltable.SymbolTable) symboltable.Variable {
 	return st.Get(i.Value)
 }

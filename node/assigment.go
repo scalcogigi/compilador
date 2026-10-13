@@ -6,7 +6,7 @@ type Assignment struct {
 	Children []Node
 }
 
-func (a Assignment) Evaluate(st symboltable.SymbolTable) int {
+func (a Assignment) Evaluate(st symboltable.SymbolTable) symboltable.Variable {
 	if len(a.Children) != 2 {
 		panic("[Assignment] Esperados dois filhos")
 	}
@@ -17,7 +17,7 @@ func (a Assignment) Evaluate(st symboltable.SymbolTable) int {
 	}
 
 	value := a.Children[1].Evaluate(st)
-	st.Insert(identifier.Value, value)
+	st.Set(identifier.Value, value)
 
 	return value
 }

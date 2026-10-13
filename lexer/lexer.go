@@ -225,6 +225,28 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 		return
 	}
 
+	if l.Source[l.Position] == '"' {
+		l.Position++ // consome a aspa de abertura
+		start := l.Position
+
+		for l.Position < len(l.Source) && l.Source[l.Position] != '"' {
+			l.Position++
+		}
+
+		if l.Position >= len(l.Source) {
+			panic("[Lexer] String sem aspas de fechamento")
+		}
+
+		value := l.Source[start:l.Position]
+		l.Position++ // consome a aspa de fechamento
+
+		l.Next = token.Token{
+			Type:  token.STR,
+			Value: value,
+		}
+		return
+	}
+
 	// Se for identificador ou palavra reservada.
 	if isLetter(l.Source[l.Position]) {
 		identifier := ""
@@ -274,12 +296,29 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 				Value: identifier,
 			}
 
+			case "var":
+				l.Next = token.Token{
+					Type: token.VAR,
+					Value: identifier,
+				}
+
+			case "true", "false":
+				l.Next = token.Token{
+					Type: token.BOOL,
+					Value: identifier == "true",
+				}
+
+			case "string", "int", "bool":
+				l.Next = token.Token{
+					Type:  token.TYPE,
+					Value: identifier,
+				}
 			default:
 				// token IDEN
 				l.Next = token.Token{
-				Type:  token.IDEN,
-				Value: identifier,
-			}
+					Type:  token.IDEN,
+					Value: identifier,
+				}
 		}
 		return
 	}
@@ -326,4 +365,11 @@ func isLetter(char byte) bool {
 
 func isDigit(char byte) bool {
 	return char >= '0' && char <= '9'
+}
+
+func isVar(char byte) bool {
+	return (char >= 'a' && char <= 'z') ||
+		(char >= 'A' && char <= 'Z') ||
+		(char >= '0' && char <= '9') ||
+		char == '_'
 }

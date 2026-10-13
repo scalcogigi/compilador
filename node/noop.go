@@ -4,6 +4,6 @@ import "compilador/symboltable"
 
 type NoOp struct{}
 
-func (n NoOp) Evaluate(st symboltable.SymbolTable) int {
-	return 0
+func (n NoOp) Evaluate(st symboltable.SymbolTable) symboltable.Variable {
+	return symboltable.Variable{}
 }

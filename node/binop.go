@@ -11,61 +11,96 @@ type BinOp struct {
 	Children []Node
 }
 
-func (b BinOp) Evaluate(st symboltable.SymbolTable) int {
-	leftValue := b.Children[0].Evaluate(st)
-	rightValue := b.Children[1].Evaluate(st)
+func (b BinOp) Evaluate(st symboltable.SymbolTable) symboltable.Variable {
+	if len(b.Children) != 2 {
+		panic("[Semantic] BinOp espera dois filhos")
+	}
+
+	left := b.Children[0].Evaluate(st)
+	right := b.Children[1].Evaluate(st)
 
 	switch b.Value {
 	case token.PLUS:
-		return leftValue + rightValue
-	case token.MINUS:
-		return leftValue - rightValue
-	case token.MULT:
-		return leftValue * rightValue
-	case token.DIV:
-		if rightValue == 0 {
-			panic("[Semantic] divisão por zero")
+		if left.Type == "string" && right.Type == "string" {
+			return symboltable.Variable{
+				Value: left.Value.(string) + right.Value.(string),
+				Type:  "string",
+			}
 		}
-		return leftValue / rightValue
-	case token.POWER:
-		return int(math.Pow(
-			float64(leftValue),
-			float64(rightValue),
-		))
 
-	case token.AND:
-		// Verdadeiro se ambos forem diferentes de zero.
-		if leftValue != 0 && rightValue != 0 {
-			return 1
+		if left.Type == "int" && right.Type == "int" {
+			return symboltable.Variable{
+				Value: left.Value.(int) + right.Value.(int),
+				Type:  "int",
+			}
 		}
-		return 0
 
-	case token.OR:
-		// Verdadeiro se pelo menos um for diferente de zero.
-		if leftValue != 0 || rightValue != 0 {
-			return 1
+		panic("[Semantic] Tipos incompatíveis para +")
+
+	case token.MINUS, token.MULT, token.DIV, token.POWER:
+		if left.Type != "int" || right.Type != "int" {
+			panic("[Semantic] Operador aritmético exige dois int")
 		}
-		return 0
+
+		a := left.Value.(int)
+		c := right.Value.(int)
+
+		switch b.Value {
+		case token.MINUS:
+			return symboltable.Variable{Value: a - c, Type: "int"}
+
+		case token.MULT:
+			return symboltable.Variable{Value: a * c, Type: "int"}
+
+		case token.DIV:
+			if c == 0 {
+				panic("[Semantic] Divisão por zero")
+			}
+			return symboltable.Variable{Value: a / c, Type: "int"}
+
+		case token.POWER:
+			result := int(math.Pow(float64(a), float64(c)))
+			return symboltable.Variable{Value: result, Type: "int"}
+		}
+	
+
+	case token.AND, token.OR:
+		if left.Type != "bool" || right.Type != "bool" {
+			panic("[Semantic] Operador lógico exige dois bool")
+		}
+
+		a := left.Value.(bool)
+		c := right.Value.(bool)
+
+		if b.Value == token.AND {
+			return symboltable.Variable{Value: a && c, Type: "bool"}
+		}
+		return symboltable.Variable{Value: a || c, Type: "bool"}
+
 
 	case token.EQ:
-		if leftValue == rightValue {
-			return 1
+		if left.Type != right.Type {
+			panic("[Semantic] Operador de igualdade exige dois valores do mesmo tipo")
 		}
-		return 0
-
-	case token.LT:
-		if leftValue < rightValue {
-			return 1
+		return symboltable.Variable{
+			Value: left.Value == right.Value,
+			Type: "bool",
 		}
-		return 0
 
-	case token.GT:
-		if leftValue > rightValue {
-			return 1
+	case token.LT, token.GT:
+		if left.Type != "int" || right.Type != "int" {
+			panic("[Semantic] Operador de comparação exige dois int")
 		}
-		return 0
 
-	default:
+		a := left.Value.(int)
+		c := right.Value.(int)
+
+		if b.Value == token.LT {
+			return symboltable.Variable{Value: a < c, Type: "bool"}
+		}
+
+		return symboltable.Variable{Value: a > c, Type: "bool"}
+
+		}
 		panic("[Semantic] operador binário inválido: " + b.Value)
-	}
 }

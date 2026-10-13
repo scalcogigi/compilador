@@ -170,6 +170,38 @@ func (p *Parser) parseStatement() node.Node {
 			},
 		}
 	}
+
+	// token VAR
+	case token.VAR:
+	p.Lex.SelectNext() // consome "var"
+
+	if p.Lex.Next.Type != token.IDEN {
+		panic("[Parser] Esperado identificador após 'var'")
+	}
+	name := p.Lex.Next.Value.(string)
+	p.Lex.SelectNext()
+
+	if p.Lex.Next.Type != token.TYPE {
+		panic("[Parser] Esperado tipo na declaração")
+	}
+	declaredType := p.Lex.Next.Value.(string)
+	p.Lex.SelectNext()
+
+	children := []node.Node{
+		node.Identifier{Value: name},
+	}
+
+	if p.Lex.Next.Type == token.ASSIGN {
+		p.Lex.SelectNext()
+		children = append(children, p.parseBoolExpression())
+	}
+
+	p.parseEnd()
+
+	return node.VarDec{
+		Value:    declaredType,
+		Children: children,
+	}
 }
 
 	panic("[Parser] Instrução inválida: " + p.Lex.Next.Type)
@@ -312,6 +344,18 @@ func (p *Parser) parsePower() node.Node {
 }
 
 func (p *Parser) parsePrimary() node.Node {
+
+	if p.Lex.Next.Type == token.BOOL {
+	value := p.Lex.Next.Value.(bool)
+	p.Lex.SelectNext()
+	return node.BoolVal{Value: value}
+}
+
+if p.Lex.Next.Type == token.STR {
+	value := p.Lex.Next.Value.(string)
+	p.Lex.SelectNext()
+	return node.StringVal{Value: value}
+}
 
 	if p.Lex.Next.Type == token.INT {
 		value := p.Lex.Next.Value.(int)

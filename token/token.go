@@ -10,7 +10,6 @@ const (
 	OPEN_PAREN  = "OPEN_PAREN"  // (
 	CLOSE_PAREN = "CLOSE_PAREN" // )
 	POWER       = "POWER"       // **
-	// FACT        = "FACT"        // !
 	ASSIGN      = "ASSIGN"      // =
 	END         = "END"         // \n
 	PRINT       = "PRINT"       // print
@@ -27,10 +26,14 @@ const (
 	READ        = "READ"        // read
 	OPEN_BRA    = "OPEN_BRA"    // {
 	CLOSE_BRA   = "CLOSE_BRA"   // }
+	VAR         = "VAR"         // var
+	BOOL   	    = "BOOL"        // booleano
+	STR         = "STR"         // string
+	TYPE		= "TYPE"        // tipo
 )
 
 type Token struct {
 	Type  string
-	Value interface{} // int ou string
+	Value interface{} // int, string ou bool
 }
 
