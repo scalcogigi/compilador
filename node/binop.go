@@ -3,11 +3,13 @@ package node
 import (
 	"compilador/symboltable"
 	"compilador/token"
+	"compilador/code"
 	"fmt"
 	"math"
 )
 
 type BinOp struct {
+	Base
 	Value    string
 	Children []Node
 }
@@ -108,3 +110,66 @@ func (b BinOp) Evaluate(st symboltable.SymbolTable) symboltable.Variable {
 
 	panic("[Semantic] Operador binário inválido: " + b.Value)
 }
+
+func (b BinOp) Generate(st symboltable.SymbolTable) {
+	if len(b.Children) != 2 {
+		panic("[Semantic] BinOp espera dois filhos")
+	}
+
+	b.Children[0].Generate(st)
+	code.Append("  push eax")
+
+	b.Children[1].Generate(st)
+	code.Append("  mov ecx, eax")
+	code.Append("  pop eax")
+
+	// eax e ecx
+	switch b.Value {
+	case token.PLUS:
+		code.Append("  add eax, ecx")
+
+	case token.MINUS:
+		code.Append("  sub eax, ecx")
+
+	case token.MULT:
+		code.Append("  imul eax, ecx")
+
+	case token.DIV:
+		code.Append("  cdq")
+		code.Append("  idiv ecx")
+
+	case token.AND:
+		code.Append("  cmp eax, 0")
+		code.Append("  setne al")
+		code.Append("  movzx eax, al")
+
+		code.Append("  cmp ecx, 0")
+		code.Append("  setne cl")
+		code.Append("  movzx ecx, cl")
+
+		code.Append("  and eax, ecx")
+
+	case token.OR:
+		code.Append("  or eax, ecx")
+		code.Append("  setne al")
+		code.Append("  movzx eax, al")
+
+	case token.EQ:
+		code.Append("  cmp eax, ecx")
+		code.Append("  sete al")
+		code.Append("  movzx eax, al")
+
+	case token.LT:
+		code.Append("  cmp eax, ecx")
+		code.Append("  setl al")
+		code.Append("  movzx eax, al")
+
+	case token.GT:
+		code.Append("  cmp eax, ecx")
+		code.Append("  setg al")
+		code.Append("  movzx eax, al")
+
+	default:
+		panic("[Semantic] Operador binário inválido: " + b.Value)
+		}
+	}

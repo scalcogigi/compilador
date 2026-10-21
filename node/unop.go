@@ -3,9 +3,11 @@ package node
 import (
 	"compilador/symboltable"
 	"compilador/token"
+	"compilador/code"
 )
 
 type UnOp struct {
+	Base
 	Value    string
 	Children []Node
 }
@@ -46,5 +48,28 @@ func (u UnOp) Evaluate(st symboltable.SymbolTable) symboltable.Variable {
 
 	default:
 		panic("[Semantic] operador unário inválido: " + u.Value)
+	}
+}
+
+func (u UnOp) Generate(st symboltable.SymbolTable) {
+	if len(u.Children) != 1 {
+		panic("[Semantic] UnOp espera um filho")
+	}
+
+	u.Children[0].Generate(st)
+
+	switch u.Value {
+	case token.PLUS: // valor no EAX por definição
+
+	case token.MINUS:
+		code.Append("  neg eax")
+
+	case token.NOT:
+		code.Append("  cmp eax, 0")
+		code.Append("  sete al")
+		code.Append("  movzx eax, al")
+
+	default:
+		panic("[Semantic] Operador unário inválido: " + u.Value)
 	}
 }

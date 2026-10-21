@@ -3,6 +3,7 @@ package node
 import "compilador/symboltable"
 
 type Block struct {
+	Base
 	Children []Node
 }
 
@@ -14,4 +15,10 @@ func (b Block) Evaluate(st symboltable.SymbolTable) symboltable.Variable {
 	}
 
 	return result
+}
+
+func (b Block) Generate(st symboltable.SymbolTable) { // percorre os todos os filhos, assim como o Evaluate
+	for _, child := range b.Children {
+		child.Generate(st)
+	}
 }

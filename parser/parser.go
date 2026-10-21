@@ -22,7 +22,7 @@ func Run(code string) node.Node {
 		panic("[Parser] Esperado EOF, mas encontrado: " + parser.Lex.Next.Type)
 	}
 
-	return result
+	return node.AssignIDs(result)
 }
 
 // parseProgram -> sequÊncia de instruções até EOF

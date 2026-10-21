@@ -32,6 +32,8 @@ func (st SymbolTable) CreateVariable(name string, variableType string) {
 	st.Table[name] = Variable{
 		Value: defaultValue,
 		Type:  variableType,
+		Shift: (len(st.Table) + 1) * 4,
+		// EBP é um registrador usado como referência para acessar as variáveis na pilha
 	}
 }
 
@@ -46,7 +48,9 @@ func (st SymbolTable) Set(name string, value Variable) {
 		panic("[Semantic] Tipo incompatível na atribuição para: " + name)
 	}
 
-	st.Table[name] = value
+	declared.Value = value.Value
+	st.Table[name] = declared
+
 }
 
 // método para buscar
