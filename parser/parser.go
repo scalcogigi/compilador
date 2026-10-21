@@ -43,9 +43,10 @@ func (p *Parser) parseBlock() node.Node {
 	if p.Lex.Next.Type != token.OPEN_BRA {
 		panic("[Parser] Esperado '{', mas encontrado: " + p.Lex.Next.Type)
 	}
+
 	p.Lex.SelectNext() // consome token
 
-	p.parseEnd()
+	// p.parseEnd()
 
 	statements := []node.Node{}
 
@@ -70,6 +71,7 @@ func (p *Parser) parseEnd() {
 	}
 	p.Lex.SelectNext()
 }
+
 // parseStatement
 func (p *Parser) parseStatement() node.Node {
 	switch p.Lex.Next.Type {
@@ -79,130 +81,134 @@ func (p *Parser) parseStatement() node.Node {
 		return node.NoOp{}
 
 	case token.OPEN_BRA:
-    	return p.parseBlock()
+		return p.parseBlock()
 
 	// atribuição
-	case token.IDEN: {
-		identifier := p.Lex.Next.Value.(string)
-		p.Lex.SelectNext()
-
-		if p.Lex.Next.Type != token.ASSIGN {
-			panic("[Parser] Esperado '=', mas encontrado: " + p.Lex.Next.Type)
-		}
-		p.Lex.SelectNext()
-
-		expression := p.parseBoolExpression()
-
-		p.parseEnd()
-
-		return node.Assignment{
-			Children: []node.Node{
-				node.Identifier{Value: identifier},
-				expression,
-			},
-		}
-	}
-
-	// condicional
-	case token.IF: {
-		p.Lex.SelectNext()
-
-		value := p.parseBoolExpression()
-		thenBlock := p.parseBlock()
-
-		children := []node.Node{
-			value,
-			thenBlock,
-		}
-
-		if p.Lex.Next.Type == token.ELSE {
+	case token.IDEN:
+		{
+			identifier := p.Lex.Next.Value.(string)
 			p.Lex.SelectNext()
 
-			elseBlock := p.parseBlock()
-			children = append(children, elseBlock)
+			if p.Lex.Next.Type != token.ASSIGN {
+				panic("[Parser] Esperado '=', mas encontrado: " + p.Lex.Next.Type)
+			}
+			p.Lex.SelectNext()
+
+			expression := p.parseBoolExpression()
+
+			p.parseEnd()
+
+			return node.Assignment{
+				Children: []node.Node{
+					node.Identifier{Value: identifier},
+					expression,
+				},
+			}
 		}
 
-		p.parseEnd()
+	// condicional
+	case token.IF:
+		{
+			p.Lex.SelectNext()
 
-		return node.IF{
-			Children: children,
+			value := p.parseBoolExpression()
+			thenBlock := p.parseBlock()
+
+			children := []node.Node{
+				value,
+				thenBlock,
+			}
+
+			if p.Lex.Next.Type == token.ELSE {
+				p.Lex.SelectNext()
+
+				elseBlock := p.parseBlock()
+				children = append(children, elseBlock)
+			}
+
+			p.parseEnd()
+
+			return node.IF{
+				Children: children,
+			}
 		}
-	} 
 
 	// while
-	case token.WHILE: {
-		p.Lex.SelectNext()
+	case token.WHILE:
+		{
+			p.Lex.SelectNext()
 
-		value := p.parseBoolExpression()
-		body := p.parseBlock()
-		
-		p.parseEnd()
+			value := p.parseBoolExpression()
+			body := p.parseBlock()
 
-		return node.While{
-			Children: []node.Node{
-				value,
-				body,
-			},
+			p.parseEnd()
+
+			return node.While{
+				Children: []node.Node{
+					value,
+					body,
+				},
+			}
 		}
-	}
 
 	// print
-	case token.PRINT: {
-		p.Lex.SelectNext()
+	case token.PRINT:
+		{
+			p.Lex.SelectNext()
 
-		if p.Lex.Next.Type != token.OPEN_PAREN {
-			panic("[Parser] Esperado '(', mas encontrado: " + p.Lex.Next.Type)
+			if p.Lex.Next.Type != token.OPEN_PAREN {
+				panic("[Parser] Esperado '(', mas encontrado: " + p.Lex.Next.Type)
+			}
+			p.Lex.SelectNext()
+
+			expression := p.parseBoolExpression()
+
+			if p.Lex.Next.Type != token.CLOSE_PAREN {
+				panic("[Parser] Esperado ')', mas encontrado: " + p.Lex.Next.Type)
+			}
+			p.Lex.SelectNext()
+
+			p.parseEnd()
+
+			return node.Println{
+				Children: []node.Node{
+					expression,
+				},
+			}
 		}
-		p.Lex.SelectNext()
-
-		expression := p.parseBoolExpression()
-
-		if p.Lex.Next.Type != token.CLOSE_PAREN {
-			panic("[Parser] Esperado ')', mas encontrado: " + p.Lex.Next.Type)
-		}
-		p.Lex.SelectNext()
-
-		p.parseEnd()
-
-		return node.Println{
-			Children: []node.Node{
-				expression,
-			},
-		}
-	}
 
 	// token VAR
 	case token.VAR:
-	p.Lex.SelectNext() // consome "var"
+		p.Lex.SelectNext() // consome "var"
 
-	if p.Lex.Next.Type != token.IDEN {
-		panic("[Parser] Esperado identificador após 'var'")
-	}
-	name := p.Lex.Next.Value.(string)
-	p.Lex.SelectNext()
-
-	if p.Lex.Next.Type != token.TYPE {
-		panic("[Parser] Esperado tipo na declaração")
-	}
-	declaredType := p.Lex.Next.Value.(string)
-	p.Lex.SelectNext()
-
-	children := []node.Node{
-		node.Identifier{Value: name},
-	}
-
-	if p.Lex.Next.Type == token.ASSIGN {
+		if p.Lex.Next.Type != token.IDEN {
+			panic("[Parser] Esperado identificador após 'var'")
+		}
+		name := p.Lex.Next.Value.(string)
 		p.Lex.SelectNext()
-		children = append(children, p.parseBoolExpression())
-	}
 
-	p.parseEnd()
+		if p.Lex.Next.Type != token.TYPE {
+			panic("[Parser] Esperado tipo na declaração")
+		}
+		declaredType := p.Lex.Next.Value.(string)
+		p.Lex.SelectNext()
 
-	return node.VarDec{
-		Value:    declaredType,
-		Children: children,
+		children := []node.Node{
+			node.Identifier{Value: name},
+		}
+
+		if p.Lex.Next.Type == token.ASSIGN {
+			p.Lex.SelectNext()
+			children = append(children, p.parseBoolExpression())
+		}
+
+		p.parseEnd()
+
+		return node.VarDec{
+			Value:    declaredType,
+			Children: children,
+		}
 	}
-}
 
 	panic("[Parser] Instrução inválida: " + p.Lex.Next.Type)
 
@@ -230,7 +236,7 @@ func (p *Parser) parseBoolExpression() node.Node {
 // parseBoolTerm
 func (p *Parser) parseBoolTerm() node.Node {
 	result := p.parseRelExpression()
-	
+
 	for p.Lex.Next.Type == token.AND {
 		operator := p.Lex.Next.Type
 		p.Lex.SelectNext() // consome token
@@ -241,7 +247,7 @@ func (p *Parser) parseBoolTerm() node.Node {
 			Value:    operator,
 			Children: []node.Node{result, right},
 		}
-	}	
+	}
 	return result
 }
 
@@ -346,16 +352,16 @@ func (p *Parser) parsePower() node.Node {
 func (p *Parser) parsePrimary() node.Node {
 
 	if p.Lex.Next.Type == token.BOOL {
-	value := p.Lex.Next.Value.(bool)
-	p.Lex.SelectNext()
-	return node.BoolVal{Value: value}
-}
+		value := p.Lex.Next.Value.(bool)
+		p.Lex.SelectNext()
+		return node.BoolVal{Value: value}
+	}
 
-if p.Lex.Next.Type == token.STR {
-	value := p.Lex.Next.Value.(string)
-	p.Lex.SelectNext()
-	return node.StringVal{Value: value}
-}
+	if p.Lex.Next.Type == token.STR {
+		value := p.Lex.Next.Value.(string)
+		p.Lex.SelectNext()
+		return node.StringVal{Value: value}
+	}
 
 	if p.Lex.Next.Type == token.INT {
 		value := p.Lex.Next.Value.(int)
