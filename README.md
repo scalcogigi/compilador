@@ -14,7 +14,7 @@ BOOLEXPRESSION = BOOLTERM,{"||",BOOLTERM} ;
 BOOLTERM = RELEXPRESSION,{"&&",RELEXPRESSION} ;
 RELEXPRESSION = EXPRESSION,{("<"|"=="|">"),EXPRESSION} ;
 EXPRESSION = TERM,{("+"|"-"),TERM} ;
-TERM = ACTOR,{("*"|"/"),FACTOR} ;
+TERM = FACTOR,{("*"|"/"),FACTOR} ;
 FACTOR = NUMBER|STRING|BOOLEAN|IDENTIFIER,("(",(BOOLEXPRESSION,{",",BOOLEXPRESSION}|Ε),")"|Ε)|("!"|"+"|"-"),FACTOR|"(",BOOLEXPRESSION,")"|"Scanln","(",")" ;
 TYPE = "string"|"int"|"bool" ;
 BOOLEAN = "true"|"false" ;
