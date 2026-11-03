@@ -5,27 +5,22 @@
 ![Diagrama Sintático](https://compiler-tester.insper-comp.com.br/ds?version=v2.3)
 
 ```ebnf
-PROGRAM = { VARDECL | FUNCDECL | "\n" } ;
-BLOCK = "{", "\n", { STATEMENT }, "}" ;
-VARDECL = "var", IDENTIFIER, TYPE, (ε | "=", BOOLEXPRESSION), "\n" ;
-FUNCDECL = "func", IDENTIFIER, "(", (ε | PARAMLIST), ")", (ε | TYPE), BLOCK, "\n" ;
-PARAMLIST = PARAM, { ",", PARAM } ;
-PARAM = IDENTIFIER, TYPE ;
-STATEMENT = VARDECL | ("Println", "(", BOOLEXPRESSION, ")", "\n") | ("for", BOOLEXPRESSION, BLOCK, "\n") | ("if", BOOLEXPRESSION, BLOCK, (ε | "else", BLOCK), "\n") | BLOCK | (IDENTIFIER, "=", BOOLEXPRESSION, "\n") | (FUNCCALL, "\n") | ("return", BOOLEXPRESSION, "\n") | "\n" ;
-FUNCCALL = IDENTIFIER, "(", (ε | ARGLIST), ")" ;
-ARGLIST = BOOLEXPRESSION, { ",", BOOLEXPRESSION } ;
-BOOLEXPRESSION = BOOLTERM, { "||", BOOLTERM } ;
-BOOLTERM = RELEXPRESSION, { "&&", RELEXPRESSION } ;
-RELEXPRESSION = EXPRESSION, (ε | ("<" | "==" | ">"), EXPRESSION) ;
-EXPRESSION = TERM, { ("+" | "-"), TERM } ;
-TERM = FACTOR, { ("*" | "/"), FACTOR } ;
-FACTOR = ("!" | "+" | "-"), FACTOR | PRIMARY, (ε | "\*\*", FACTOR) ;
-PRIMARY = NUMBER | BOOLEAN | STRING | IDENTIFIER | FUNCCALL | "(", BOOLEXPRESSION, ")" | "Scanln", "(", ")" ;
-TYPE = "string" | "int" | "bool" ;
-BOOLEAN = "true" | "false" ;
-STRING = '"', { "..." }, '"' ;
-IDENTIFIER = LETTER, { LETTER | DIGIT | "\_" } ;
-NUMBER = DIGIT, { DIGIT } ;
-LETTER = "a" | "b" | ... | "z" | "A" | "B" | ... | "Z" ;
-DIGIT = "0" | "1" | ... | "9" ;
+PROGRAM = {(FUNCDEC|VARDEC|Ε),"\n"} ;
+FUNCDEC = "func",IDENTIFIER,"(",(IDENTIFIER,TYPE,{",",IDENTIFIER,TYPE}|Ε),")",(TYPE|Ε),BLOCK ;
+VARDEC = "var",IDENTIFIER,TYPE,("=",BOOLEXPRESSION|Ε) ;
+BLOCK = "{","\n",{STATEMENT,},"}" ;
+STATEMENT = ("return",BOOLEXPRESSION|("Println","(",BOOLEXPRESSION,")")|("for",BOOLEXPRESSION,STATEMENT)|("if",BOOLEXPRESSION,BLOCK,(Ε|"else",BLOCK))|(IDENTIFIER,("=" ,BOOLEXPRESSION|"(",(BOOLEXPRESSION,{",",BOOLEXPRESSION}|Ε),")"))|BLOCK|VARDEC|Ε),"\n" ;
+BOOLEXPRESSION = BOOLTERM,{"||",BOOLTERM} ;
+BOOLTERM = RELEXPRESSION,{"&&",RELEXPRESSION} ;
+RELEXPRESSION = EXPRESSION,{("<"|"=="|">"),EXPRESSION} ;
+EXPRESSION = TERM,{("+"|"-"),TERM} ;
+TERM = FACTOR,{("\*"|"/"),FACTOR} ;
+FACTOR = NUMBER|STRING|BOOLEAN|IDENTIFIER,("(",(BOOLEXPRESSION,{",",BOOLEXPRESSION}|Ε),")"|Ε)|("!"|"+"|"-"),FACTOR|"(",BOOLEXPRESSION,")"|"Scanln","(",")" ;
+TYPE = "string"|"int"|"bool" ;
+BOOLEAN = "true"|"false" ;
+STRING = '"',{"..."},'"' ;
+IDENTIFIER = LETTER,{LETTER|DIGIT|"\_"} ;
+NUMBER = DIGIT,{DIGIT} ;
+LETTER = "a"|...|"z"|"A"|...|"Z" ;
+DIGIT = "0"|...|"9" ;
 ```
