@@ -477,7 +477,7 @@ func (p *Parser) parseFuncCall(name string) node.Node {
 }
 
 func (p *Parser) parseFuncDeclaration() node.Node {
-	p.Lex.SelectNext() // FUNC
+	p.Lex.SelectNext() 
 
 	if p.Lex.Next.Type != token.IDEN {
 		panic("[Parser] Esperado nome da função")
@@ -516,10 +516,14 @@ func (p *Parser) parseFuncDeclaration() node.Node {
 			break
 		}
 		p.Lex.SelectNext()
+
+		if p.Lex.Next.Type == token.CLOSE_PAREN {
+			panic("[Parser] Esperado parâmetro após ','")
+		}
 	}
 
 	if p.Lex.Next.Type != token.CLOSE_PAREN {
-		panic("[Parser] Esperado ')' após parâmetros")
+		panic("[Parser] Esperado ')', mas encontrado: " + p.Lex.Next.Type)
 	}
 	p.Lex.SelectNext()
 
