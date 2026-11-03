@@ -17,10 +17,14 @@ func (i IF) Evaluate(st symboltable.SymbolTable) symboltable.Variable {
 	}
 
 	if condition.Value.(bool) {
-		i.Children[1].Evaluate(st)
-	} else if len(i.Children) == 3 {
-		i.Children[2].Evaluate(st)
-	}	
+		local := symboltable.New(&st)
+		return i.Children[1].Evaluate(local)
+	}
+
+	if len(i.Children) == 3 {
+		local := symboltable.New(&st)
+		return i.Children[2].Evaluate(local)
+	}
 
 	return symboltable.Variable{}
 }

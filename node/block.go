@@ -10,7 +10,16 @@ func (b Block) Evaluate(st symboltable.SymbolTable) symboltable.Variable {
 	var result symboltable.Variable
 
 	for _, child := range b.Children {
-		result = child.Evaluate(st)
+		if nestedBlock, ok := child.(Block); ok {
+			local := symboltable.New(&st)
+			result = nestedBlock.Evaluate(local)
+		} else {
+			result = child.Evaluate(st)
+		}
+
+		if result.IsReturn {
+			return result
+		}
 	}
 
 	return result

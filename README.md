@@ -2,22 +2,29 @@
 
 [![Compilation Status](https://compiler-tester.insper-comp.com.br/svg/scalcogigi/compilador)](https://compiler-tester.insper-comp.com.br/svg/scalcogigi/compilador)
 
-![Diagrama Sintático](https://compiler-tester.insper-comp.com.br/ds?version=v2.2)
+![Diagrama Sintático](https://compiler-tester.insper-comp.com.br/ds?version=v2.3)
 
 ```ebnf
-PROGRAM = { STATEMENT } ;
+PROGRAM = { VARDECL | FUNCDECL | "\n" } ;
 BLOCK = "{", "\n", { STATEMENT }, "}" ;
-STATEMENT = ("var", IDENTIFIER, TYPE, (ε | "=", BOOLEXPRESSION) | ("Println", "(", BOOLEXPRESSION, ")") | ("for", BOOLEXPRESSION, BLOCK) | ("if", BOOLEXPRESSION, BLOCK, (ε | "else", BLOCK) | ) | BLOCK | IDENTIFIER, "=", BOOLEXPRESSION | ε), "\n" ;
+VARDECL = "var", IDENTIFIER, TYPE, (ε | "=", BOOLEXPRESSION), "\n" ;
+FUNCDECL = "func", IDENTIFIER, "(", (ε | PARAMLIST), ")", (ε | TYPE), BLOCK, "\n" ;
+PARAMLIST = PARAM, { ",", PARAM } ;
+PARAM = IDENTIFIER, TYPE ;
+STATEMENT = VARDECL | ("Println", "(", BOOLEXPRESSION, ")", "\n") | ("for", BOOLEXPRESSION, BLOCK, "\n") | ("if", BOOLEXPRESSION, BLOCK, (ε | "else", BLOCK), "\n") | BLOCK | (IDENTIFIER, "=", BOOLEXPRESSION, "\n") | (FUNCCALL, "\n") | ("return", BOOLEXPRESSION, "\n") | "\n" ;
+FUNCCALL = IDENTIFIER, "(", (ε | ARGLIST), ")" ;
+ARGLIST = BOOLEXPRESSION, { ",", BOOLEXPRESSION } ;
 BOOLEXPRESSION = BOOLTERM, { "||", BOOLTERM } ;
 BOOLTERM = RELEXPRESSION, { "&&", RELEXPRESSION } ;
-RELEXPRESSION = EXPRESSION, { ("<" | "==" | ">"), EXPRESSION } ;
+RELEXPRESSION = EXPRESSION, (ε | ("<" | "==" | ">"), EXPRESSION) ;
 EXPRESSION = TERM, { ("+" | "-"), TERM } ;
 TERM = FACTOR, { ("*" | "/"), FACTOR } ;
-FACTOR = NUMBER | BOOLEAN | STRING | IDENTIFIER | ("!" | "+" | "-"), FACTOR | "(", BOOLEXPRESSION, ")" | "Scanln", "(", ")" ;
+FACTOR = ("!" | "+" | "-"), FACTOR | PRIMARY, (ε | "\*\*", FACTOR) ;
+PRIMARY = NUMBER | BOOLEAN | STRING | IDENTIFIER | FUNCCALL | "(", BOOLEXPRESSION, ")" | "Scanln", "(", ")" ;
 TYPE = "string" | "int" | "bool" ;
 BOOLEAN = "true" | "false" ;
 STRING = '"', { "..." }, '"' ;
-IDENTIFIER = LETTER, { LETTER | DIGIT | "_" } ;
+IDENTIFIER = LETTER, { LETTER | DIGIT | "\_" } ;
 NUMBER = DIGIT, { DIGIT } ;
 LETTER = "a" | "b" | ... | "z" | "A" | "B" | ... | "Z" ;
 DIGIT = "0" | "1" | ... | "9" ;

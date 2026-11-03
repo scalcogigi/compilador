@@ -225,6 +225,17 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 		return
 	}
 
+	// se vírgula
+	if l.Source[l.Position] == ',' {
+		l.Next = token.Token{
+			Type:  token.COMMA,
+			Value: ",",
+		}
+		l.Position++
+
+		return
+	}
+
 	if l.Source[l.Position] == '"' {
 		l.Position++ // consome a aspa de abertura
 		start := l.Position
@@ -313,6 +324,19 @@ func (l *Lexer) SelectNext() { // seleciona o próximo token e remove espaços
 					Type:  token.TYPE,
 					Value: identifier,
 				}
+
+			case "func":
+				l.Next = token.Token{
+					Type:  token.FUNC,
+					Value: identifier,
+				}
+
+			case "return":
+				l.Next = token.Token{
+					Type:  token.RETURN,
+					Value: identifier,
+				}
+				
 			default:
 				// token IDEN
 				l.Next = token.Token{

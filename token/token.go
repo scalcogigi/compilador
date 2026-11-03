@@ -30,6 +30,9 @@ const (
 	BOOL   	    = "BOOL"        // booleano
 	STR         = "STR"         // string
 	TYPE		= "TYPE"        // tipo
+	FUNC        = "FUNC"        // função
+	RETURN      = "RETURN"      // return
+	COMMA       = "COMMA"       // vírgula
 )
 
 type Token struct {

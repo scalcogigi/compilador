@@ -23,8 +23,9 @@ func main() {
 
 	result := parser.Run(codigo)
 
-	st := symboltable.New()
+	st := symboltable.New(nil)
 	result.Evaluate(st)
 }
 
 // processa os elementos, retorna o resultado e printa
+

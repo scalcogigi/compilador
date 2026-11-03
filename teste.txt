@@ -1,6 +1,6 @@
-var idade int = 20
-var nome string = "Giovanna"
-var ativo bool = true
-Println(idade + 2)
-Println(nome + "!")
-Println(ativo && idade > 18)
+func main() {
+    {
+        var x int = 10
+    }
+    Println(x)
+}

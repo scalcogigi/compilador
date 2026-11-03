@@ -21,7 +21,12 @@ func (w While) Evaluate(st symboltable.SymbolTable) symboltable.Variable {
 			break
 		}
 
-		w.Children[1].Evaluate(st)
+		local := symboltable.New(&st)
+		result := w.Children[1].Evaluate(local)
+
+		if result.IsReturn {
+			return result
+		}
 	}
 
 	return symboltable.Variable{}

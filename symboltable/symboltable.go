@@ -2,12 +2,14 @@ package symboltable
 
 type SymbolTable struct {
 	Table map[string]Variable
+	Parent *SymbolTable
 }
 
 // método para criar nova tabela
-func New() SymbolTable {
+func New(parent *SymbolTable) SymbolTable {
 	return SymbolTable{
 		Table: make(map[string]Variable),
+		Parent: parent,
 	}
 }
 
@@ -35,24 +37,43 @@ func (st SymbolTable) CreateVariable(name string, variableType string) {
 	}
 }
 
-// Altera uma variável que já foi declarada.
+// Altera uma variável que já foi declarada, busca recursiva
 func (st SymbolTable) Set(name string, value Variable) {
 	declared, exists := st.Table[name]
-	if !exists {
-		panic("[Semantic] Variável não definida: " + name)
+
+	if exists {
+		if declared.IsFunction {
+			panic("[Semantic] Não é possível atribuir à função: " + name)
+		}
+
+		if declared.Type != value.Type {
+			panic("[Semantic] Tipo incompatível na atribuição para: " + name)
+		}
+
+		st.Table[name] = value
+		return
 	}
 
-	if declared.Type != value.Type {
-		panic("[Semantic] Tipo incompatível na atribuição para: " + name)
+	if st.Parent != nil {
+		st.Parent.Set(name, value)
+		return
 	}
 
-	st.Table[name] = value
+	panic("[Semantic] Variável não definida: " + name)
 }
 
 // método para buscar
 func (st *SymbolTable) Find(name string) (Variable, bool) {
 	variable, exists := st.Table[name]
-	return variable, exists
+	if exists {
+		return variable, true
+	}
+
+	if st.Parent != nil {
+		return st.Parent.Find(name)
+	}
+
+	return Variable{}, false
 }
 
 func (st SymbolTable) Get(name string) Variable {

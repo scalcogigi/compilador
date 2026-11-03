@@ -22,7 +22,18 @@ func Run(code string) node.Node {
 		panic("[Parser] Esperado EOF, mas encontrado: " + parser.Lex.Next.Type)
 	}
 
-	return result
+	program, ok := result.(node.Block)
+	if !ok {
+		panic("[Parser] A raiz do programa deve ser um Block")
+	}
+
+	program.Children = append(program.Children, node.FUNCCALL{
+		Value:    "main",
+		Children: []node.Node{},
+	})
+
+	return program
+
 }
 
 // parseProgram -> sequÊncia de instruções até EOF
@@ -30,8 +41,17 @@ func (p *Parser) parseProgram() node.Node {
 	statements := []node.Node{}
 
 	for p.Lex.Next.Type != token.EOF {
-		statements = append(statements, p.parseStatement())
-	}
+		switch p.Lex.Next.Type {
+		case token.FUNC:
+				statements = append(statements, p.parseFuncDeclaration())
+		case token.VAR:
+				statements = append(statements, p.parseStatement())
+		case token.END:
+			p.Lex.SelectNext()
+		default: 
+			panic("[Parser]")
+		}
+}
 
 	return node.Block{
 		Children: statements,
@@ -63,6 +83,11 @@ func (p *Parser) parseBlock() node.Node {
 	}
 }
 
+// // Declaração de função
+// func (p *Parser) parseFuncDeclaration() node.Node {
+// 	return
+// }
+
 // Valida e consome o fim de uma instrução.
 func (p *Parser) parseEnd() {
 	if p.Lex.Next.Type != token.END {
@@ -85,6 +110,12 @@ func (p *Parser) parseStatement() node.Node {
 	case token.IDEN: {
 		identifier := p.Lex.Next.Value.(string)
 		p.Lex.SelectNext()
+
+		if p.Lex.Next.Type == token.OPEN_PAREN {
+			call := p.parseFuncCall(identifier)
+			p.parseEnd()
+			return call
+		}
 
 		if p.Lex.Next.Type != token.ASSIGN {
 			panic("[Parser] Esperado '=', mas encontrado: " + p.Lex.Next.Type)
@@ -146,6 +177,15 @@ func (p *Parser) parseStatement() node.Node {
 		}
 	}
 
+	case token.RETURN:
+		p.Lex.SelectNext()
+		expression := p.parseBoolExpression()
+		p.parseEnd()
+
+		return node.RETURN{
+			Children: []node.Node{expression},
+		}
+	
 	// print
 	case token.PRINT: {
 		p.Lex.SelectNext()
@@ -370,6 +410,10 @@ if p.Lex.Next.Type == token.STR {
 		identifier := p.Lex.Next.Value.(string)
 		p.Lex.SelectNext()
 
+		if p.Lex.Next.Type == token.OPEN_PAREN {
+			return p.parseFuncCall(identifier)
+		}
+
 		return node.Identifier{
 			Value: identifier,
 		}
@@ -406,4 +450,90 @@ if p.Lex.Next.Type == token.STR {
 	}
 
 	panic("[Parser] Expressão primária inválida: " + p.Lex.Next.Type)
+}
+
+func (p *Parser) parseFuncCall(name string) node.Node {
+	p.Lex.SelectNext() // consome "("
+	args := []node.Node{}
+
+	if p.Lex.Next.Type != token.CLOSE_PAREN {
+		args = append(args, p.parseBoolExpression())
+
+		for p.Lex.Next.Type == token.COMMA {
+			p.Lex.SelectNext()
+			args = append(args, p.parseBoolExpression())
+		}
+	}
+
+	if p.Lex.Next.Type != token.CLOSE_PAREN {
+		panic("[Parser] Esperado ')', mas encontrado: " + p.Lex.Next.Type)
+	}
+	p.Lex.SelectNext()
+
+	return node.FUNCCALL{
+		Value: name,
+		Children: args,
+	}
+}
+
+func (p *Parser) parseFuncDeclaration() node.Node {
+	p.Lex.SelectNext() // FUNC
+
+	if p.Lex.Next.Type != token.IDEN {
+		panic("[Parser] Esperado nome da função")
+	}
+	name := p.Lex.Next.Value.(string)
+	p.Lex.SelectNext()
+
+	if p.Lex.Next.Type != token.OPEN_PAREN {
+		panic("[Parser] Esperado '(' após nome da função")
+	}
+	p.Lex.SelectNext()
+
+	children := []node.Node{node.Identifier{Value: name}}
+
+	for p.Lex.Next.Type != token.CLOSE_PAREN {
+		if p.Lex.Next.Type != token.IDEN {
+			panic("[Parser] Esperado nome de parâmetro")
+		}
+		paramName := p.Lex.Next.Value.(string)
+		p.Lex.SelectNext()
+
+		if p.Lex.Next.Type != token.TYPE {
+			panic("[Parser] Esperado tipo do parâmetro")
+		}
+		paramType := p.Lex.Next.Value.(string)
+		p.Lex.SelectNext()
+
+		children = append(children, node.VarDec{
+			Value: paramType,
+			Children: []node.Node{
+				node.Identifier{Value: paramName},
+			},
+		})
+
+		if p.Lex.Next.Type != token.COMMA {
+			break
+		}
+		p.Lex.SelectNext()
+	}
+
+	if p.Lex.Next.Type != token.CLOSE_PAREN {
+		panic("[Parser] Esperado ')' após parâmetros")
+	}
+	p.Lex.SelectNext()
+
+	returnType := ""
+	if p.Lex.Next.Type == token.TYPE {
+		returnType = p.Lex.Next.Value.(string)
+		p.Lex.SelectNext()
+	}
+
+	children = append(children, p.parseBlock())
+	p.parseEnd()
+
+	return node.FUNCDEC{
+		Value:    returnType,
+		Children: children,
+	}
 }
